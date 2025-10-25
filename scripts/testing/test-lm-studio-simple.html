@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LM Studio Integration Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        button {
+            background-color: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #005a87;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .info {
+            color: #17a2b8;
+        }
+        .warning {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .config-section {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-connected { background-color: #28a745; }
+        .status-disconnected { background-color: #dc3545; }
+        .status-unknown { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 LM Studio Integration Test</h1>
+        
+        <div class="config-section">
+            <h3>Configuration</h3>
+            <label for="baseUrl">LM Studio Base URL:</label><br>
+            <input type="text" id="baseUrl" value="http://192.168.0.15:1234/v1" placeholder="http://192.168.0.15:1234/v1">
+            <button onclick="updateConfig()">Update</button>
+        </div>
+
+        <div class="test-section">
+            <h3><span id="connectionStatus" class="status-indicator status-unknown"></span>Connection Test</h3>
+            <p>Test if LM Studio server is accessible</p>
+            <button onclick="testConnection()">Test Connection</button>
+            <div id="connectionResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3><span id="modelsStatus" class="status-indicator status-unknown"></span>Models Test</h3>
+            <p>Fetch available models from LM Studio</p>
+            <button onclick="testModels()">List Models</button>
+            <div id="modelsResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3><span id="chatStatus" class="status-indicator status-unknown"></span>Chat Completion Test</h3>
+            <p>Test chat completion with a simple prompt</p>
+            <button onclick="testChatCompletion()">Test Chat</button>
+            <div id="chatResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Troubleshooting</h3>
+            <div id="troubleshooting">
+                <p><strong>If tests fail, try:</strong></p>
+                <ul>
+                    <li>Ensure LM Studio is running</li>
+                    <li>Load a model in LM Studio</li>
+                    <li>Check that the server URL is correct</li>
+                    <li>Verify no firewall is blocking the connection</li>
+                    <li>Try restarting LM Studio</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let baseUrl = 'http://192.168.0.15:1234/v1';
+
+        function updateConfig() {
+            baseUrl = document.getElementById('baseUrl').value.replace(/\/$/, '');
+            console.log('Updated base URL to:', baseUrl);
+            // Reset all status indicators
+            resetStatusIndicators();
+        }
+
+        function resetStatusIndicators() {
+            const indicators = ['connectionStatus', 'modelsStatus', 'chatStatus'];
+            indicators.forEach(id => {
+                const element = document.getElementById(id);
+                element.className = 'status-indicator status-unknown';
+            });
+        }
+
+        function setStatus(indicatorId, status) {
+            const element = document.getElementById(indicatorId);
+            element.className = `status-indicator status-${status}`;
+        }
+
+        function logResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info';
+            element.innerHTML = `<div class="${className}">[${timestamp}] ${message}</div>`;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        async function testConnection() {
+            logResult('connectionResult', 'Testing connection...', 'info');
+            
+            try {
+                const response = await fetch(`${baseUrl}/models`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                setStatus('connectionStatus', 'connected');
+                logResult('connectionResult', '✅ Connection successful!', 'success');
+                return true;
+            } catch (error) {
+                setStatus('connectionStatus', 'disconnected');
+                logResult('connectionResult', `❌ Connection failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testModels() {
+            logResult('modelsResult', 'Fetching models...', 'info');
+            
+            try {
+                const response = await fetch(`${baseUrl}/models`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.data && Array.isArray(data.data)) {
+                    if (data.data.length === 0) {
+                        setStatus('modelsStatus', 'disconnected');
+                        logResult('modelsResult', '⚠️ No models loaded in LM Studio', 'warning');
+                    } else {
+                        setStatus('modelsStatus', 'connected');
+                        const modelsList = data.data.map((model, index) => 
+                            `${index + 1}. ${model.id} (${model.owned_by || 'unknown'})`
+                        ).join('<br>');
+                        logResult('modelsResult', `✅ Found ${data.data.length} model(s):<br>${modelsList}`, 'success');
+                    }
+                    return data.data;
+                } else {
+                    setStatus('modelsStatus', 'disconnected');
+                    logResult('modelsResult', '⚠️ Unexpected response format', 'warning');
+                    console.log('Models response:', data);
+                    return [];
+                }
+            } catch (error) {
+                setStatus('modelsStatus', 'disconnected');
+                logResult('modelsResult', `❌ Models test failed: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        async function testChatCompletion() {
+            logResult('chatResult', 'Testing chat completion...', 'info');
+            
+            // First get available models
+            const models = await testModels();
+            if (!models || models.length === 0) {
+                logResult('chatResult', '❌ No models available for chat test', 'error');
+                return;
+            }
+
+            const testModel = models[0].id;
+            logResult('chatResult', `Using model: ${testModel}`, 'info');
+
+            const testMessages = [
+                {
+                    role: 'system',
+                    content: 'You are a helpful assistant. Respond briefly and clearly.'
+                },
+                {
+                    role: 'user',
+                    content: 'Hello! Can you tell me what 2+2 equals?'
+                }
+            ];
+
+            try {
+                const response = await fetch(`${baseUrl}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: testModel,
+                        messages: testMessages,
+                        max_tokens: 100,
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    const responseText = data.choices[0].message.content;
+                    setStatus('chatStatus', 'connected');
+                    
+                    let resultMessage = `✅ Chat completion successful!<br><strong>Response:</strong> "${responseText.trim()}"`;
+                    if (data.usage) {
+                        resultMessage += `<br><strong>Token usage:</strong> ${data.usage.prompt_tokens} input, ${data.usage.completion_tokens} output`;
+                    }
+                    
+                    logResult('chatResult', resultMessage, 'success');
+                    return true;
+                } else {
+                    setStatus('chatStatus', 'disconnected');
+                    logResult('chatResult', '⚠️ Unexpected response format from chat completion', 'warning');
+                    console.log('Chat response:', data);
+                    return false;
+                }
+            } catch (error) {
+                setStatus('chatStatus', 'disconnected');
+                logResult('chatResult', `❌ Chat completion failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        // Run connection test on page load
+        window.addEventListener('load', () => {
+            console.log('LM Studio Integration Test loaded');
+            console.log('Base URL:', baseUrl);
+        });
+    </script>
+</body>
+</html>

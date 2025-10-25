@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  tts-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.tts
+    container_name: criminalminds-tts
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount voices directory so you can add/update voices without rebuilding
+      - ./voices:/app/voices
+      # Mount cache for model downloads (persists between container restarts)
+      - tts-cache:/root/.local/share/tts
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - tts-network
+
+networks:
+  tts-network:
+    driver: bridge
+
+volumes:
+  tts-cache:
+    driver: local
+

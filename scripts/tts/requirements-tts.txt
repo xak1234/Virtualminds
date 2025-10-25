@@ -1,0 +1,20 @@
+# Self-Hosted TTS Server Requirements
+# Install with: pip install -r requirements-tts.txt
+
+# Core TTS library
+TTS>=0.22.0
+
+# Web server
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# File handling
+python-multipart>=0.0.6
+
+# Optional but recommended for better performance
+torch>=2.0.0
+torchaudio>=2.0.0
+
+# For CUDA support (GPU acceleration), install PyTorch with CUDA:
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+

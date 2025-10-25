@@ -1,0 +1,94 @@
+{
+  "voice_mappings": {
+    "tony_blair": {
+      "voice_id": "QgANejRxHKptfmIRwYjz",
+      "keywords": ["tony", "blair", "prime minister", "british", "politician"],
+      "description": "Tony Blair voice"
+    },
+    "gypsy": {
+      "voice_id": "0zj1iWvloMkAXydIFsJR",
+      "keywords": ["gypsy", "romani", "traveller"],
+      "description": "Gypsy voice"
+    },
+    "lucy": {
+      "voice_id": "wJqPPQ618aTW29mptyoc",
+      "keywords": ["lucy", "lucille", "lucia"],
+      "description": "Lucy voice"
+    },
+    "lucy_letby": {
+      "voice_id": "XiPS9cXxAVbaIWtGDHDh",
+      "keywords": ["lucy", "letby", "nurse", "serial", "killer"],
+      "description": "Lucy Letby voice"
+    },
+    "idi_amin": {
+      "voice_id": "nzeAacJi50IvxcyDnMXa",
+      "keywords": ["idi", "amin", "uganda", "dictator"],
+      "description": "Idi Amin voice"
+    },
+    "jimmy": {
+      "voice_id": "0wH2SYZc8WNwRG3KvW8Y",
+      "keywords": ["jimmy", "james", "jim"],
+      "description": "Jimmy voice"
+    },
+    "yorkshire_rip": {
+      "voice_id": "L4MFuhvdj7bLDtJvenaG",
+      "keywords": ["yorkshire", "rip", "northern", "british"],
+      "description": "Yorkshire RIP voice"
+    },
+    "huntley": {
+      "voice_id": "YPXMkYErPo2xZ3hYlVgh",
+      "keywords": ["huntley", "ian", "soham"],
+      "description": "Huntley voice"
+    },
+    "karen_shannon": {
+      "voice_id": "jTggECn2zuQjyUTllM9w",
+      "keywords": ["karen", "shannon"],
+      "description": "Karen Shannon voice"
+    },
+    "adolf_hitler": {
+      "voice_id": "nzeAacJi50IvxcyDnMXa",
+      "keywords": ["adolf", "hitler", "fuhrer", "nazi"],
+      "description": "Adolf Hitler voice"
+    },
+    "donald_trump": {
+      "voice_id": "4rHqGaNIyV4kXveqPQcM",
+      "keywords": ["donald", "trump", "president", "american", "politician"],
+      "description": "Donald Trump voice"
+    },
+    "jill_dando": {
+      "voice_id": "E4IXevHtHpKGh0bvrPPr",
+      "keywords": ["jill", "dando", "journalist", "tv presenter", "british"],
+      "description": "Jill Dando voice"
+    },
+    "reggie_cray": {
+      "voice_id": "Oe8Lhg3t63j9BsrTQBjx",
+      "keywords": ["reggie", "cray", "reggie cray"],
+      "description": "Reggie Cray voice"
+    },
+    "myra_hindley": {
+      "voice_id": "ZbI9lWkt1RyZ47WRzQ7t",
+      "keywords": ["myra", "hindley", "myra hindley", "moors murderer"],
+      "description": "Myra Hindley voice"
+    },
+    "maxine_carr": {
+      "voice_id": "zd1c6qDiwPV3b24VZtor",
+      "keywords": ["maxine", "carr", "maxine carr", "soham murders"],
+      "description": "Maxine Carr voice"
+    },
+    "mr_t": {
+      "voice_id": "YEkUdc7PezGaXaRslSHB",
+      "keywords": ["mr t", "mr. t", "mister t", "t", "a-team"],
+      "description": "Mr T voice"
+    },
+    "katie_price": {
+      "voice_id": "8KYy93EAxjFrU2DHJCar",
+      "keywords": ["katie", "price", "katie price", "kp", "katey", "jordan"],
+      "description": "Katie Price voice"
+    }
+  },
+  "assignment_log": {
+    "created": "2025-01-01",
+    "last_updated": "2025-01-01",
+    "assignments_made": []
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "geminiApiKey": "your-gemini-api-key-here",
+  "openaiApiKey": "your-openai-api-key-here",
+  "claudeApiKey": "your-claude-api-key-here", 
+  "elevenlabsApiKey": "",
+  "openaiTtsApiKey": "your-openai-tts-api-key-here",
+  "geminiTtsApiKey": "your-google-cloud-tts-api-key-here",
+  "lmStudioBaseUrl": "http://192.168.0.15:1234/v1"
+}

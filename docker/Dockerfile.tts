@@ -1,0 +1,32 @@
+# Dockerfile for Self-Hosted TTS Server with Coqui XTTS-v2
+FROM python:3.11-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    ffmpeg \
+    libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements
+COPY scripts/requirements-tts.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir TTS fastapi uvicorn[standard] python-multipart
+
+# Copy server script
+COPY scripts/coqui-xtts-server.py .
+
+# Create voices directory
+RUN mkdir -p /app/voices
+
+# Expose port
+EXPOSE 8000
+
+# Run the server
+CMD ["python", "coqui-xtts-server.py"]
+

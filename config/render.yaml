@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: criminal-mind-framework
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false  # Set this in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false  # Optional - Set this in Render dashboard if using OpenAI
