@@ -13,7 +13,7 @@
 import readline from 'readline';
 
 // Configuration
-const LLM_SERVER_URL = process.env.VITE_LM_STUDIO_BASE_URL || 'http://192.168.0.15:1234/v1';
+const LLM_SERVER_URL = process.env.VITE_LM_STUDIO_BASE_URL || 'http://127.0.0.1:1234/v1';
 
 // Colors for console output
 const colors = {

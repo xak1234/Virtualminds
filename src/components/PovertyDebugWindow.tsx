@@ -298,7 +298,7 @@ export const PovertyDebugWindow: React.FC<PovertyDebugWindowProps> = ({
                   pubVisits.map((visit, idx) => (
                     <div key={idx} className="p-2 rounded bg-gray-900 border border-orange-700/30">
                       <div className="text-xs text-gray-400">{visit.time || new Date().toLocaleTimeString()}</div>
-                      <div className="text-sm text-orange-400">🍺 {visit.personality || 'Unknown'}</div>
+                      <div className="text-sm text-orange-400">🍺 {visit.personalityName || 'Unknown'}</div>
                       {visit.activity && <div className="text-xs text-gray-400">{visit.activity}</div>}
                     </div>
                   ))
@@ -377,6 +377,33 @@ export const PovertyDebugWindow: React.FC<PovertyDebugWindowProps> = ({
                         <div>Assaults: <span className="text-red-400">{status.assaultIncidents}</span></div>
                         <div>Harassment: <span className="text-orange-400">{status.harassmentIncidents}</span></div>
                       </div>
+                      
+                      {/* Survival Activities */}
+                      {status.survivalActivity !== 'none' && (
+                        <div className="mt-2 p-2 rounded border border-gray-600 bg-gray-800/50">
+                          <div className="text-xs font-bold text-yellow-400 mb-1">SURVIVAL ACTIVITY</div>
+                          <div className="text-xs space-y-1">
+                            <div>Current: <span className={`uppercase font-bold ${
+                              status.survivalActivity === 'homeless' ? 'text-orange-500' :
+                              status.survivalActivity === 'prostitution' ? 'text-pink-500' :
+                              status.survivalActivity === 'temp_housing' ? 'text-blue-500' :
+                              'text-green-500'
+                            }`}>{status.survivalActivity.replace('_', ' ')}</span></div>
+                            {status.survivalActivity === 'temp_housing' && status.tempHousingDays > 0 && (
+                              <div>Days left: <span className="text-white">{status.tempHousingDays}</span></div>
+                            )}
+                            {status.foodBankVisits > 0 && (
+                              <div>Food bank visits: <span className="text-green-400">{status.foodBankVisits}</span></div>
+                            )}
+                            {status.prostitutionEarnings > 0 && (
+                              <div>Sex work earnings: <span className="text-pink-400">£{status.prostitutionEarnings}</span></div>
+                            )}
+                            {status.prostitutionRisks > 0 && (
+                              <div>Sex work risks: <span className="text-red-400">{status.prostitutionRisks}</span></div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       
                       {status.ejectedFromSimulation && (
                         <div className="mt-2 p-2 bg-yellow-900/30 rounded border border-yellow-700">

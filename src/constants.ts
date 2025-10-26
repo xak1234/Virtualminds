@@ -165,7 +165,7 @@ SESSION COMMANDS:
                             Stops all conversations but keeps personalities saved in slots.
   stop (!stop!)           - 🛑 COMPREHENSIVE SYSTEM RESET:
                             • Unloads all personalities
-                            • Closes all windows, games, and stops all conversations
+                            • Closes all windows, games, debug windows, and stops all conversations
                             • Disables TTS globally
                             • Resets all experimental settings to defaults
                             • Disables gang mode
@@ -287,7 +287,7 @@ CONFIG COMMANDS:
                             Keys: temp, topP, topK, tokens.
                             e.g., 'cfg temp 0.8'
   llm [ip:port]           - Set LM Studio server URL (saved to user profile).
-                            Example: llm 192.168.0.15:1234
+                            Example: llm 127.0.0.1:1234
                             If no arguments, shows current URL.
 
 UI COMMANDS:

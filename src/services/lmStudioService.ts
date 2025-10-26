@@ -72,7 +72,7 @@ const getBaseUrl = (): string => {
   }
   
   // Default URL
-  return 'http://192.168.0.15:1234/v1';
+  return 'http://127.0.0.1:1234/v1';
 };
 
 async function post<T>(path: string, body: any, signal?: AbortSignal): Promise<T> {

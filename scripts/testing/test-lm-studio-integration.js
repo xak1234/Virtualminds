@@ -17,7 +17,7 @@
 import fetch from 'node-fetch';
 
 // Configuration
-const LM_STUDIO_BASE_URL = process.env.VITE_LM_STUDIO_BASE_URL || 'http://192.168.0.15:1234/v1';
+const LM_STUDIO_BASE_URL = process.env.VITE_LM_STUDIO_BASE_URL || 'http://127.0.0.1:1234/v1';
 const TEST_TIMEOUT = 30000; // 30 seconds
 
 // Colors for console output

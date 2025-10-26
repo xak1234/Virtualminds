@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
             secure: false
           },
           '/lm-studio': {
-            target: env.VITE_LM_STUDIO_BASE_URL || 'http://192.168.0.15:1234/v1',
+            target: env.VITE_LM_STUDIO_BASE_URL || 'http://127.0.0.1:1234/v1',
             changeOrigin: true,
             secure: false,
             rewrite: (path) => path.replace(/^\/lm-studio/, '')

@@ -279,8 +279,20 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
             }`}
             style={{
               animationDuration: isCurrentSpeaker ? '2s' : undefined,
-              borderLeft: isGangLeader && gang ? `4px solid ${gang.color}` : undefined,
-              boxShadow: isGangLeader && gang ? `0 0 10px ${gang.color}40` : undefined,
+              borderLeft: isGangLeader && gang 
+                ? `4px solid ${gang.color}` 
+                : povertyEnabled && povertyStatus && (povertyStatus.survivalActivity === 'homeless' || povertyStatus.currentHousing === 'street')
+                  ? '4px solid #ea580c' // Orange border for homeless
+                  : povertyEnabled && povertyStatus && povertyStatus.survivalActivity === 'prostitution'
+                    ? '4px solid #ec4899' // Pink border for prostitution
+                    : undefined,
+              boxShadow: isGangLeader && gang 
+                ? `0 0 10px ${gang.color}40` 
+                : povertyEnabled && povertyStatus && (povertyStatus.survivalActivity === 'homeless' || povertyStatus.currentHousing === 'street')
+                  ? '0 0 10px #ea580c40' // Orange glow for homeless
+                  : povertyEnabled && povertyStatus && povertyStatus.survivalActivity === 'prostitution'
+                    ? '0 0 10px #ec489940' // Pink glow for prostitution
+                    : undefined,
               textDecoration: isKilled && !gangsEnabled ? 'line-through' : undefined,
             }}
           >
@@ -309,6 +321,28 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
                 <span className="text-xs">👑</span>
               </div>
             ) : null}
+            
+            {/* Poverty Status Badges - Homeless and Prostitution */}
+            {povertyEnabled && povertyStatus && (
+              <>
+                {povertyStatus.survivalActivity === 'homeless' || povertyStatus.currentHousing === 'street' ? (
+                  <div 
+                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 border-orange-500 bg-orange-600/90 flex items-center justify-center shadow-lg z-10 animate-pulse"
+                    title="HOMELESS - Living on the streets"
+                  >
+                    <span className="text-xs">🏚️</span>
+                  </div>
+                ) : povertyStatus.survivalActivity === 'prostitution' ? (
+                  <div 
+                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full border-2 border-pink-500 bg-pink-600/90 flex items-center justify-center shadow-lg z-10"
+                    title="SEX WORK - Engaged in prostitution for survival"
+                  >
+                    <span className="text-xs">💋</span>
+                  </div>
+                ) : null}
+              </>
+            )}
+            
             <button
               onClick={() => {
                 // Prevent interaction with killed personalities in any mode

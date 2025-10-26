@@ -106,7 +106,7 @@
         <div class="config-section">
             <h3>Configuration</h3>
             <label for="baseUrl">LM Studio Base URL:</label><br>
-            <input type="text" id="baseUrl" value="http://192.168.0.15:1234/v1" placeholder="http://192.168.0.15:1234/v1">
+            <input type="text" id="baseUrl" value="http://127.0.0.1:1234/v1" placeholder="http://127.0.0.1:1234/v1">
             <button onclick="updateConfig()">Update</button>
         </div>
 
@@ -147,7 +147,7 @@
     </div>
 
     <script>
-        let baseUrl = 'http://192.168.0.15:1234/v1';
+        let baseUrl = 'http://127.0.0.1:1234/v1';
 
         function updateConfig() {
             baseUrl = document.getElementById('baseUrl').value.replace(/\/$/, '');

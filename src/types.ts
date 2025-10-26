@@ -87,6 +87,7 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   authorName?: string; // To specify which AI is talking in a conversation
+  authorAvatar?: string; // Profile image URL of the message sender
 }
 
 export enum CliOutputType {
@@ -436,6 +437,14 @@ export interface PovertyPersonalityStatus {
   successfulEvasions: number;
   failedEvasions: number;
   improvementScore: number; // Overall improvement metric
+  
+  // Survival Activities (when out of money)
+  survivalActivity: 'none' | 'food_bank' | 'temp_housing' | 'prostitution' | 'homeless';
+  survivalActivityStarted?: number; // Timestamp when activity started
+  foodBankVisits: number; // Times used food bank
+  tempHousingDays: number; // Days in temporary housing
+  prostitutionEarnings: number; // Total earned from prostitution
+  prostitutionRisks: number; // Times faced danger while prostituting
 }
 
 export interface PovertyConfig {

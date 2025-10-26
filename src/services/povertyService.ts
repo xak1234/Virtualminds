@@ -142,6 +142,13 @@ class PovertyService {
       successfulEvasions: 0,
       failedEvasions: 0,
       improvementScore: 50,
+      
+      // Survival Activities
+      survivalActivity: 'none',
+      foodBankVisits: 0,
+      tempHousingDays: 0,
+      prostitutionEarnings: 0,
+      prostitutionRisks: 0,
     };
   }
 
@@ -166,9 +173,12 @@ class PovertyService {
     // Debug logging
     const personality = allPersonalities.find(p => p.id === personalityStatus.personalityId);
     const personalityName = personality?.name || personalityStatus.personalityId;
-    console.log(`[POVERTY DEBUG] Simulating day for ${personalityName}:`);
+    console.log(`[POVERTY DEBUG] === DAY ${status.days_unemployed} SIMULATION FOR ${personalityName.toUpperCase()} ===`);
+    console.log(`  - Cash: £${status.cash_on_hand.toFixed(2)}`);
     console.log(`  - Days unemployed: ${status.days_unemployed}`);
-    console.log(`  - Cash on hand: £${status.cash_on_hand.toFixed(2)}`);
+    console.log(`  - DWP Status: ${status.struckOffBenefits ? 'STRUCK OFF' : 'ELIGIBLE'} (Approved: ${status.dwpClaimsApproved}, Denied: ${status.dwpClaimsDenied}, Fraud: ${status.falseClaims}/3)`);
+    console.log(`  - Next DWP payment due: Day ${Math.ceil((status.days_unemployed + 1) / 7) * 7} (in ${Math.ceil((status.days_unemployed + 1) / 7) * 7 - status.days_unemployed} days)`);
+    console.log(`  - Next PIP payment due: Day ${Math.ceil((status.days_unemployed + 1) / 30) * 30} (in ${Math.ceil((status.days_unemployed + 1) / 30) * 30 - status.days_unemployed} days)`);
     console.log(`  - Struck off benefits: ${status.struckOffBenefits}`);
     console.log(`  - Job status: ${status.job_status}`);
 
@@ -202,7 +212,7 @@ class PovertyService {
       status.totalFundsReceived += jobWage;
       
       event = {
-        id: `poverty-job-${Date.now()}`,
+        id: this.generateUniqueEventId('poverty-job'),
         time: new Date().toISOString(),
         type: 'job_found',
         message: `Found ${status.job_status} work earning £${jobWage} today`,
@@ -212,7 +222,7 @@ class PovertyService {
       // Temp job ended
       status.job_status = 'none';
       event = {
-        id: `poverty-job-lost-${Date.now()}`,
+        id: this.generateUniqueEventId('poverty-job-lost'),
         time: new Date().toISOString(),
         type: 'job_lost',
         message: 'Temporary work contract ended',
@@ -229,7 +239,7 @@ class PovertyService {
       if (Math.random() < 0.05) {
         status.job_status = 'fired';
         event = {
-          id: `poverty-fired-${Date.now()}`,
+          id: this.generateUniqueEventId('poverty-fired'),
           time: new Date().toISOString(),
           type: 'job_lost',
           message: 'Fired from job - back to unemployment',
@@ -239,7 +249,7 @@ class PovertyService {
     }
 
     // === WELFARE PAYMENTS (Weekly) ===
-    console.log(`[POVERTY DEBUG] Checking DWP eligibility: days_unemployed % 7 = ${status.days_unemployed % 7}, struckOff = ${status.struckOffBenefits}`);
+    console.log(`[POVERTY DEBUG] ${personalityName} - Day ${status.days_unemployed}: DWP Check - Modulo 7 = ${status.days_unemployed % 7}, Struck Off = ${status.struckOffBenefits}, Fraud Strikes = ${status.falseClaims}/3`);
     if (status.days_unemployed % 7 === 0 && !status.struckOffBenefits) {
       console.log(`[POVERTY DEBUG] ${personalityName} is eligible for DWP payment!`);
       if (Math.random() < config.fraudDetectionRate) {
@@ -253,7 +263,7 @@ class PovertyService {
           status.currentHousing = 'street'; // Forced to streets
           
           event = {
-            id: `poverty-struck-off-${Date.now()}`,
+            id: this.generateUniqueEventId('poverty-struck-off'),
             time: new Date().toISOString(),
             type: 'benefit_denied',
             message: '🚨 STRUCK OFF BENEFITS - Permanently removed from DWP/PIP system due to fraud',
@@ -261,7 +271,7 @@ class PovertyService {
           };
         } else {
           event = {
-            id: `poverty-audit-${Date.now()}`,
+            id: this.generateUniqueEventId('poverty-audit'),
             time: new Date().toISOString(),
             type: 'inspection',
             message: `DWP fraud investigation - Warning ${status.falseClaims}/3 strikes`,
@@ -278,7 +288,7 @@ class PovertyService {
           status.dwpClaimsDenied += 1;
           dwpPayment = { amount: 0, status: 'denied' };
           event = {
-            id: `poverty-denial-${Date.now()}`,
+            id: this.generateUniqueEventId('poverty-denial'),
             time: new Date().toISOString(),
             type: 'benefit_denied',
             message: 'DWP claim denied - no payment this week',
@@ -294,7 +304,7 @@ class PovertyService {
           dwpPayment = { amount: dwpPaymentAmount, status: 'received' };
           console.log(`[POVERTY DEBUG] ✅ DWP Payment Generated: ${personalityName} received £${dwpPaymentAmount}`);
           event = {
-            id: `poverty-claim-${Date.now()}`,
+            id: this.generateUniqueEventId('poverty-claim'),
             time: new Date().toISOString(),
             type: 'benefit_claim',
             message: `DWP weekly payment received: £${dwpPaymentAmount}`,
@@ -356,7 +366,7 @@ class PovertyService {
     // === PIP CLAIMS (Monthly) ===
     const pipEligible = status.days_unemployed % 30 === 0 && !status.struckOffBenefits;
     const pipChance = Math.random();
-    console.log(`[POVERTY DEBUG] Checking PIP eligibility: days_unemployed % 30 = ${status.days_unemployed % 30}, struckOff = ${status.struckOffBenefits}, chance = ${pipChance.toFixed(3)} (need < 0.3)`);
+    console.log(`[POVERTY DEBUG] ${personalityName} - Day ${status.days_unemployed}: PIP Check - Modulo 30 = ${status.days_unemployed % 30}, Struck Off = ${status.struckOffBenefits}, Chance = ${pipChance.toFixed(3)} (need < 0.3)`);
     if (pipEligible && pipChance < 0.3) {
       console.log(`[POVERTY DEBUG] ${personalityName} is attempting PIP claim!`);
       // Chance to claim PIP based on health/mental health issues
@@ -395,7 +405,7 @@ class PovertyService {
 
       if (status.addiction_level > 80 && Math.random() < 0.05) {
         event = {
-          id: `poverty-addiction-${Date.now()}`,
+          id: this.generateUniqueEventId('poverty-addiction'),
           time: new Date().toISOString(),
           type: 'addiction',
           message: 'Severe substance dependency - health declining rapidly',
@@ -412,7 +422,7 @@ class PovertyService {
       
       if (status.evictionRisk > 0.9 && Math.random() < 0.3 && status.cash_on_hand < 50) {
         event = {
-          id: `poverty-eviction-${Date.now()}`,
+          id: this.generateUniqueEventId('poverty-eviction'),
           time: new Date().toISOString(),
           type: 'eviction_notice',
           message: 'Evicted due to unpaid rent - forced onto streets',
@@ -456,13 +466,109 @@ class PovertyService {
       dangerChange += 2;
     }
     
+    // === SURVIVAL OPTIONS (When out of money) ===
+    if (status.cash_on_hand <= 5 && status.survivalActivity === 'none') {
+      // Randomly choose a survival option when desperate
+      const survivalOptions = ['food_bank', 'temp_housing', 'prostitution', 'homeless'];
+      const chosenOption = survivalOptions[Math.floor(Math.random() * survivalOptions.length)];
+      
+      status.survivalActivity = chosenOption;
+      status.survivalActivityStarted = Date.now();
+      
+      switch (chosenOption) {
+        case 'food_bank':
+          status.foodBankVisits += 1;
+          const foodBankAid = Math.floor(Math.random() * 10) + 5; // £5-15
+          status.cash_on_hand += foodBankAid;
+          event = {
+            id: this.generateUniqueEventId('poverty-food-bank'),
+            time: new Date().toISOString(),
+            type: 'survival_activity',
+            message: `🍞 Visited food bank - received £${foodBankAid} emergency aid`,
+            severity: 'medium',
+          };
+          status.stressLevel = clamp(status.stressLevel - 5, 0, 100); // Small stress relief
+          break;
+          
+        case 'temp_housing':
+          status.tempHousingDays = 7; // 1 week temporary housing
+          status.currentHousing = 'hostel';
+          event = {
+            id: this.generateUniqueEventId('poverty-temp-housing'),
+            time: new Date().toISOString(),
+            type: 'survival_activity',
+            message: '🏠 Secured temporary housing - 7 days in emergency shelter',
+            severity: 'medium',
+          };
+          status.stressLevel = clamp(status.stressLevel - 10, 0, 100); // Stress relief from shelter
+          break;
+          
+        case 'prostitution':
+          const earnings = Math.floor(Math.random() * 80) + 20; // £20-100
+          status.prostitutionEarnings += earnings;
+          status.cash_on_hand += earnings;
+          
+          // High risk activity
+          if (Math.random() < 0.3) {
+            status.prostitutionRisks += 1;
+            status.health = clamp(status.health - 10, 0, 100);
+            dangerChange += 10;
+          }
+          
+          event = {
+            id: this.generateUniqueEventId('poverty-prostitution'),
+            time: new Date().toISOString(),
+            type: 'survival_activity',
+            message: `💋 Engaged in sex work - earned £${earnings} (high risk activity)`,
+            severity: 'high',
+          };
+          status.stressLevel = clamp(status.stressLevel + 15, 0, 100); // Increases stress
+          status.psychologicalStability = clamp(status.psychologicalStability - 5, 0, 100);
+          break;
+          
+        case 'homeless':
+          status.currentHousing = 'street';
+          event = {
+            id: this.generateUniqueEventId('poverty-homeless'),
+            time: new Date().toISOString(),
+            type: 'survival_activity',
+            message: '🏚️ Became homeless - sleeping rough on the streets',
+            severity: 'critical',
+          };
+          status.stressLevel = clamp(status.stressLevel + 20, 0, 100);
+          status.health = clamp(status.health - 5, 0, 100);
+          dangerChange += 15; // Very dangerous
+          break;
+      }
+    }
+    
+    // Handle ongoing survival activities
+    if (status.survivalActivity === 'temp_housing' && status.tempHousingDays > 0) {
+      status.tempHousingDays -= 1;
+      if (status.tempHousingDays <= 0) {
+        status.survivalActivity = 'none';
+        status.currentHousing = 'street'; // Back to streets when temp housing expires
+      }
+    }
+    
+    // Reset survival activities when money situation improves
+    if (status.cash_on_hand > 50 && status.survivalActivity !== 'none' && status.survivalActivity !== 'temp_housing') {
+      console.log(`[POVERTY DEBUG] ${personalityName} has improved finances (£${status.cash_on_hand}) - resetting survival activity from ${status.survivalActivity}`);
+      status.survivalActivity = 'none';
+      
+      // If they were homeless, move them to hostel
+      if (status.currentHousing === 'street') {
+        status.currentHousing = 'hostel';
+      }
+    }
+    
     // === INCIDENTS (Harassment, Assault, Arrest) ===
     // Only one incident per day - prioritize most severe
     if (Math.random() < config.policeVisitFrequency * timeRiskMultiplier) {
       status.incident_today = 'arrest';
       dangerChange += 15; // Arrest significantly increases danger
       event = {
-        id: `poverty-arrest-${Date.now()}`,
+        id: this.generateUniqueEventId('poverty-arrest'),
         time: new Date().toISOString(),
         type: 'police_check',
         message: 'Arrested by police - detained overnight',
@@ -484,7 +590,7 @@ class PovertyService {
       }
 
       event = {
-        id: `poverty-assault-${Date.now()}`,
+        id: this.generateUniqueEventId('poverty-assault'),
         time: new Date().toISOString(),
         type: 'assault',
         message: `Physical assault - ${severity} injuries sustained`,
@@ -497,7 +603,7 @@ class PovertyService {
       status.harassmentIncidents += 1;
       dangerChange += 5; // Harassment moderately increases danger
       event = {
-        id: `poverty-harassment-${Date.now()}`,
+        id: this.generateUniqueEventId('poverty-harassment'),
         time: new Date().toISOString(),
         type: 'harassment',
         message: 'Verbal abuse and threats from locals',
@@ -513,7 +619,7 @@ class PovertyService {
     // === OVERDOSE RISK ===
     if (status.addiction_level > 70 && Math.random() < config.deathRiskFromOverdose) {
       event = {
-        id: `poverty-overdose-${Date.now()}`,
+        id: this.generateUniqueEventId('poverty-overdose'),
         time: new Date().toISOString(),
         type: 'overdose',
         message: 'CRITICAL: Overdose incident - life-threatening situation',
@@ -526,7 +632,7 @@ class PovertyService {
     // === RECOVERY ATTEMPTS ===
     if (status.psychologicalStability < 30 && Math.random() < config.recoveryRate) {
       event = {
-        id: `poverty-recovery-${Date.now()}`,
+        id: this.generateUniqueEventId('poverty-recovery'),
         time: new Date().toISOString(),
         type: 'recovery',
         message: 'Seeking help - attempting counseling/support services',
@@ -541,7 +647,7 @@ class PovertyService {
       status.hospitalDaysRemaining -= 1;
       if (status.hospitalDaysRemaining === 0) {
         event = {
-          id: `poverty-discharged-${Date.now()}`,
+          id: this.generateUniqueEventId('poverty-discharged'),
           time: new Date().toISOString(),
           type: 'health_crisis',
           message: 'Discharged from hospital - back to daily struggle',

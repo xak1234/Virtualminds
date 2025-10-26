@@ -478,7 +478,7 @@ CONFIGURE CONNECTION:
   
 EXAMPLES:
   llm localhost:1234       Connect to local LM Studio
-  llm 192.168.0.15:1234    Connect to remote LM Studio
+  llm 127.0.0.1:1234       Connect to local LM Studio
   llm 10.0.0.100:8080      Connect to custom server
 
 DIRECT COMMUNICATION:

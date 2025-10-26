@@ -10,7 +10,7 @@
  *   node scripts/setup/configure-llm-server.js [URL]
  * 
  * Examples:
- *   node scripts/setup/configure-llm-server.js http://192.168.0.15:1234
+ *   node scripts/setup/configure-llm-server.js http://127.0.0.1:1234
  *   node scripts/setup/configure-llm-server.js http://localhost:1234
  */
 
@@ -198,7 +198,7 @@ async function main() {
     logError('Please provide the LLM server URL as an argument');
     logInfo('Usage: node scripts/setup/configure-llm-server.js <URL>');
     logInfo('Examples:');
-    logInfo('  node scripts/setup/configure-llm-server.js http://192.168.0.15:1234');
+    logInfo('  node scripts/setup/configure-llm-server.js http://127.0.0.1:1234');
     logInfo('  node scripts/setup/configure-llm-server.js http://localhost:1234');
     process.exit(1);
   }

@@ -464,8 +464,11 @@ const App: React.FC = () => {
     setChessOpponent(null);
     setChessHistory([]);
 
+    // Close all debug windows and clear their data
     setDebugOpen(false);
     setDebugEvents([]);
+    setApiDebugOpen(false);
+    setApiDebugMinimized(false);
     setGangDebugOpen(false);
     setGangEvents([]);
     setGangConversations([]);
@@ -2872,7 +2875,13 @@ const isGuiSource = source === 'gui' || source === 'converse';
     // Handle chat history and CLI output (skip for converse mode as it's handled separately)
     if (source !== 'converse') {
       addDebugEvent('gen_response', `Generate done ← ${personality.name}`, `Len: ${responseText?.length ?? 0}` + (sanitized !== responseText ? ' (sanitized)' : ''), { preview: (sanitized || '').slice(0, 500) });
-      const newAiMessage: ChatMessage = { author: MessageAuthor.AI, text: sanitized, timestamp: new Date().toISOString(), authorName };
+      const newAiMessage: ChatMessage = { 
+        author: MessageAuthor.AI, 
+        text: sanitized, 
+        timestamp: new Date().toISOString(), 
+        authorName,
+        authorAvatar: authorName ? activePersonalities.find(p => p.name === authorName)?.profileImage : undefined
+      };
       
       // For chess, update chess history instead of regular chat history
       if (source === 'chess') {
@@ -2974,7 +2983,8 @@ const isGuiSource = source === 'gui' || source === 'converse';
       author: MessageAuthor.AI, 
       text: message, 
       timestamp: new Date().toISOString(),
-      authorName: fromPersonality.name
+      authorName: fromPersonality.name,
+      authorAvatar: fromPersonality.profileImage
     };
     
     // Add message to target personality's history
@@ -3010,11 +3020,20 @@ const isGuiSource = source === 'gui' || source === 'converse';
         console.log(`[POVERTY DEBUG] Checking ${personality.name} (${personality.id}) - has status: ${!!currentStatus}`);
         if (currentStatus) {
           console.log(`[POVERTY DEBUG] Running simulation for ${personality.name} (${personality.id})`);
+          const previousDaysUnemployed = currentStatus.days_unemployed;
           const { status: updatedStatus, event: povertyEvent, dwpPayment, pipPayment, pubVisit } = povertyService.simulateDay(
             experimentalSettings.povertyConfig!,
             currentStatus,
             activePersonalities
           );
+          
+          // Check if a week has passed (every 7 days)
+          const previousWeek = Math.floor(previousDaysUnemployed / 7);
+          const currentWeek = Math.floor(updatedStatus.days_unemployed / 7);
+          if (currentWeek > previousWeek) {
+            console.log(`[POVERTY AUDIO] Week ${currentWeek} reached for ${personality.name} - playing recruit.mp3`);
+            gangSoundService.play('recruit');
+          }
           
           // Update the status
           setExperimentalSettings(prev => ({
@@ -3677,7 +3696,13 @@ const isGuiSource = source === 'gui' || source === 'converse';
           break;
         }
 
-        addMessageToBoth({ author: MessageAuthor.AI, text: currentMessage, timestamp: new Date().toISOString(), authorName: speaker.name });
+        addMessageToBoth({ 
+          author: MessageAuthor.AI, 
+          text: currentMessage, 
+          timestamp: new Date().toISOString(), 
+          authorName: speaker.name,
+          authorAvatar: speaker.profileImage
+        });
 
         // Process gang interactions if gangs are enabled
         if (experimentalSettings.gangsEnabled && experimentalSettings.gangsConfig) {
@@ -3790,11 +3815,20 @@ const isGuiSource = source === 'gui' || source === 'converse';
             console.log(`[POVERTY DEBUG] Checking ${personality.name} (${personality.id}) - has status: ${!!currentStatus}`);
             if (currentStatus) {
               console.log(`[POVERTY DEBUG] Running simulation for ${personality.name} (${personality.id})`);
+              const previousDaysUnemployed = currentStatus.days_unemployed;
               const { status: updatedStatus, event: povertyEvent, dwpPayment, pipPayment, pubVisit } = povertyService.simulateDay(
                 experimentalSettings.povertyConfig!,
                 currentStatus,
                 activePersonalities
               );
+              
+              // Check if a week has passed (every 7 days)
+              const previousWeek = Math.floor(previousDaysUnemployed / 7);
+              const currentWeek = Math.floor(updatedStatus.days_unemployed / 7);
+              if (currentWeek > previousWeek) {
+                console.log(`[POVERTY AUDIO] Week ${currentWeek} reached for ${personality.name} - playing recruit.mp3`);
+                gangSoundService.play('recruit');
+              }
               
               // Update the status
               setExperimentalSettings(prev => ({
@@ -4096,7 +4130,8 @@ ${speaker.name}: "${currentMessage}"`;
           author: MessageAuthor.AI, 
           text: response, 
           timestamp: new Date().toISOString(), 
-          authorName: currentSpeaker.name 
+          authorName: currentSpeaker.name,
+          authorAvatar: currentSpeaker.profileImage
         });
       }
     }
@@ -4397,7 +4432,8 @@ Speak in first person only - no action descriptions, no asterisks, no third-pers
           author: MessageAuthor.AI, 
           text: response, 
           timestamp: new Date().toISOString(), 
-          authorName: currentSpeaker.name 
+          authorName: currentSpeaker.name,
+          authorAvatar: currentSpeaker.profileImage
         });
 
         // Process gang interactions in group conversation
@@ -4865,6 +4901,7 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
   };
 
   const handleCommand = async (commandStr: string, sourceWindowId?: string) => {
+    console.log(`🚀 [DEBUG] handleCommand called with: "${commandStr}"`);
     const commandResponse = (text: string, type: CliOutputType = CliOutputType.RESPONSE) => {
         setCliHistory(prev => [...prev, { type, text }]);
         if (sourceWindowId) {
@@ -4926,10 +4963,16 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
                            isDirectLlmCommand ? commandStr : commandStr;
     let [command, ...args] = cleanCommandStr.split(/\s+/);
     
+    console.log(`🔍 [DEBUG] Command: "${command}", Pending: ${pendingConfirmation}`);
+    
     // Handle pending confirmation responses (Y/N)
     if (pendingConfirmation) {
+      console.log(`⏳ [DEBUG] Confirmation pending: "${pendingConfirmation}", Response: "${command}"`);
       const response = command.toLowerCase();
-      if (response === 'y' || response === 'yes') {
+      
+      // Only treat Y/Yes/N/No as confirmation responses, allow other commands to proceed
+      if (response === 'y' || response === 'yes' || response === 'n' || response === 'no') {
+        if (response === 'y' || response === 'yes') {
         // User confirmed, execute the pending action
         const action = pendingConfirmation;
         setPendingConfirmation(null);
@@ -4981,20 +5024,64 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           commandResponse('✅ User logged out - returned to login screen');
           commandResponse('', CliOutputType.RESPONSE);
           commandResponse('Application ready for fresh start. Please login to continue.', CliOutputType.RESPONSE);
+        } else if (action === 'stop') {
+          // Perform comprehensive system reset (like original STOP command)
+          ttsService.cancel();
+          applyGlobalTts(false);
+
+          const windowCount = windows.length;
+          const personalityCount = activePersonalities.length;
+          const conversationCount = conversingPersonalityIds.length;
+          const gangsWereEnabled = experimentalSettings.gangsEnabled;
+          const gamesOpen = (isGameWindowOpen ? 1 : 0) + (isCelebrityGameOpen ? 1 : 0) + (chessOpponent ? 1 : 0);
+
+          if (currentUser) {
+            userProfileService.saveUserProfile(currentUser, []);
+          }
+
+          resetApplicationToInitialState();
+
+          // Provide comprehensive feedback
+          const messages: string[] = [];
+          if (windowCount > 0) {
+            messages.push(`closed ${windowCount} window${windowCount !== 1 ? 's' : ''}`);
+          }
+          if (personalityCount > 0) {
+            messages.push(`unloaded ${personalityCount} personalit${personalityCount !== 1 ? 'ies' : 'y'}`);
+          }
+          if (conversationCount > 0) {
+            messages.push(`stopped ${conversationCount} conversation${conversationCount !== 1 ? 's' : ''}`);
+          }
+          if (gamesOpen > 0) {
+            messages.push(`closed ${gamesOpen} game${gamesOpen !== 1 ? 's' : ''}`);
+          }
+          
+          commandResponse('🛑 SYSTEM RESET COMPLETE', CliOutputType.RESPONSE);
+          if (messages.length > 0) {
+            commandResponse(`✅ ${messages.join(', ')}`);
+          }
+          commandResponse('✅ TTS disabled globally');
+          commandResponse('✅ All experimental settings reset to defaults');
+          if (gangsWereEnabled) {
+            commandResponse('✅ Gang mode disabled');
+          }
+          commandResponse('✅ Mood reset to neutral');
+          commandResponse('✅ All prompts reset to standard framework');
+          commandResponse('', CliOutputType.RESPONSE);
+          commandResponse('System ready for fresh start. Load personalities to begin.', CliOutputType.RESPONSE);
         }
         return;
-      } else if (response === 'n' || response === 'no') {
-        // User cancelled
-        setPendingConfirmation(null);
-        commandResponse('Operation cancelled.', CliOutputType.RESPONSE);
-        return;
+        } else if (response === 'n' || response === 'no') {
+          // User cancelled
+          setPendingConfirmation(null);
+          commandResponse('Operation cancelled.', CliOutputType.RESPONSE);
+          return;
+        }
       } else {
-        // Invalid response, ask again
-        commandResponse('=======================================', CliOutputType.ERROR);
-        commandResponse('Invalid response!', CliOutputType.ERROR);
-        commandResponse('Choose Yes or No', CliOutputType.ERROR);
-        commandResponse('Please respond with Y (yes) or N (no):', CliOutputType.ERROR);
-        commandResponse('=======================================', CliOutputType.ERROR);
+        // Not a Y/N response, treat as a regular command but remind about pending confirmation
+        commandResponse('⚠️ You have a pending confirmation. Please respond with Y (yes) or N (no) first.', CliOutputType.WARNING);
+        commandResponse(`Pending: ${pendingConfirmation.toUpperCase()} command is waiting for confirmation.`, CliOutputType.WARNING);
+        commandResponse('Type "N" to cancel the pending confirmation if you want to run a different command.', CliOutputType.WARNING);
         return;
       }
     }
@@ -5072,7 +5159,12 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
        setCliHistory(prev => [...prev, { type: CliOutputType.COMMAND, text: displayCommand }]);
     }
 
+    const originalCommand = command;
     command = CLI_SHORTCUTS[command.toLowerCase()] || command.toLowerCase();
+    
+    if (originalCommand !== command) {
+      console.log(`🔄 [DEBUG] Shortcut: "${originalCommand}" -> "${command}"`);
+    }
 
     // Fuzzy matching - auto-correct typos within 1 character edit distance
     const allValidCommands = Object.values(CLI_COMMANDS);
@@ -5399,7 +5491,7 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
         // Validate IP:Port format
         const ipPortRegex = /^(?:https?:\/\/)?(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|localhost|[\w.-]+):(\d{1,5})(?:\/.*)?$/;
         if (!ipPortRegex.test(urlArg)) {
-          commandResponse('Error: Invalid format. Use IP:PORT (e.g., 192.168.0.15:1234)', CliOutputType.ERROR);
+          commandResponse('Error: Invalid format. Use IP:PORT (e.g., 127.0.0.1:1234)', CliOutputType.ERROR);
           break;
         }
         
@@ -7373,26 +7465,28 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
         }
         break;
       }
-      case CLI_COMMANDS.CLOSE_ALL:
-      case CLI_COMMANDS.STOP: {
-        // COMPREHENSIVE RESET: Full system shutdown and reset
-
+      case CLI_COMMANDS.CLOSE_ALL: {
+        // Close all windows and unload all personalities (no confirmation needed)
         ttsService.cancel();
-        applyGlobalTts(false);
 
         const windowCount = windows.length;
         const personalityCount = activePersonalities.length;
         const conversationCount = conversingPersonalityIds.length;
-        const gangsWereEnabled = experimentalSettings.gangsEnabled;
         const gamesOpen = (isGameWindowOpen ? 1 : 0) + (isCelebrityGameOpen ? 1 : 0) + (chessOpponent ? 1 : 0);
 
         if (currentUser) {
           userProfileService.saveUserProfile(currentUser, []);
         }
 
-        resetApplicationToInitialState();
+        // Close windows and unload personalities but don't reset settings
+        setWindows([]);
+        setActivePersonalities([]);
+        setConversingPersonalityIds([]);
+        setIsGameWindowOpen(false);
+        setIsCelebrityGameOpen(false);
+        setChessOpponent(null);
 
-        // Provide comprehensive feedback
+        // Provide feedback
         const messages = [];
         if (windowCount > 0) {
           messages.push(`closed ${windowCount} window${windowCount !== 1 ? 's' : ''}`);
@@ -7407,20 +7501,33 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           messages.push(`closed ${gamesOpen} game${gamesOpen !== 1 ? 's' : ''}`);
         }
         
-        commandResponse('🛑 SYSTEM RESET INITIATED', CliOutputType.RESPONSE);
+        commandResponse('✅ CLOSE ALL COMPLETE', CliOutputType.RESPONSE);
         if (messages.length > 0) {
           commandResponse(`✅ ${messages.join(', ')}`);
         }
-        commandResponse('✅ TTS disabled globally');
-        commandResponse('✅ All experimental settings reset to defaults');
-        if (gangsWereEnabled) {
-          commandResponse('✅ Gang mode disabled');
-        }
-        commandResponse('✅ Mood reset to neutral');
-        commandResponse('✅ All prompts reset to standard framework');
-        commandResponse('', CliOutputType.RESPONSE);
-        commandResponse('System ready for fresh start. Load personalities to begin.', CliOutputType.RESPONSE);
+        commandResponse('All windows closed and personalities unloaded. Settings preserved.');
         break;
+      }
+      case CLI_COMMANDS.STOP: {
+        console.log('🛑 [DEBUG] STOP command case reached!');
+        // Always show confirmation for stop command
+        commandResponse('⚠️  WARNING: STOP will perform a comprehensive system reset!', CliOutputType.ERROR);
+        commandResponse('This will:', CliOutputType.RESPONSE);
+        commandResponse('• Close all chat windows and stop all conversations', CliOutputType.RESPONSE);
+        commandResponse('• Unload all personalities and clear all history', CliOutputType.RESPONSE);
+        commandResponse('• Reset all settings to defaults (gangs, mood, TTS, etc.)', CliOutputType.RESPONSE);
+        commandResponse('• Disable TTS globally and reset all experimental settings', CliOutputType.RESPONSE);
+        commandResponse('', CliOutputType.RESPONSE);
+        commandResponse('', CliOutputType.RESPONSE);
+        commandResponse('🔴🔴🔴 CONFIRMATION REQUIRED 🔴🔴🔴', CliOutputType.RESPONSE);
+        commandResponse('>>> Type Y to confirm or N to cancel <<<', CliOutputType.RESPONSE);
+        commandResponse('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴', CliOutputType.RESPONSE);
+        console.log('📝 [DEBUG] Y/N prompt messages sent to CLI');
+        console.log('⚠️ [DEBUG] Setting pending confirmation to "stop"');
+        setPendingConfirmation('stop');
+        console.log('✅ [DEBUG] STOP command should now wait for Y/N confirmation');
+        console.log('🚫 [DEBUG] RETURNING - should NOT execute reset immediately');
+        return; // Use return instead of break to exit immediately
       }
       case CLI_COMMANDS.EXIT:
         if (cliFocusedPersonalityId) {
@@ -7448,10 +7555,10 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
         commandResponse('• Reset all settings to defaults (gangs, mood, TTS, etc.)', CliOutputType.RESPONSE);
         commandResponse('• Log you out and return to the login screen ? (Y/N)', CliOutputType.RESPONSE);
         commandResponse('', CliOutputType.RESPONSE);
-        commandResponse('=======================================', CliOutputType.ERROR);
-        commandResponse('Choose Yes or No', CliOutputType.ERROR);
-        commandResponse('Are you sure you want to quit? (Y/N):', CliOutputType.ERROR);
-        commandResponse('=======================================', CliOutputType.ERROR);
+        commandResponse('', CliOutputType.RESPONSE);
+        commandResponse('🔴🔴🔴 CONFIRMATION REQUIRED 🔴🔴🔴', CliOutputType.RESPONSE);
+        commandResponse('>>> Type Y to confirm or N to cancel <<<', CliOutputType.RESPONSE);
+        commandResponse('🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴🔴', CliOutputType.RESPONSE);
         setPendingConfirmation('quit');
         return; // Use return instead of break to exit immediately
       }

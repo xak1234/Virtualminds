@@ -39,13 +39,13 @@ If you want to use LM Studio for Claude AI integration instead of the cloud API:
 
 2. **Update Configuration:**
    - Set `lmStudioBaseUrl` in your `api-keys.json` to your LM Studio server URL
-   - Default is `http://192.168.0.15:1234/v1` (custom LLM server)
+   - Default is `http://127.0.0.1:1234/v1` (local LLM server)
    - You can also set the environment variable `VITE_LM_STUDIO_BASE_URL`
 
 3. **Environment Variable (Alternative):**
    ```bash
    # Create .env.local file for custom LLM server
-   echo "VITE_LM_STUDIO_BASE_URL=http://192.168.0.15:1234/v1" > .env.local
+   echo "VITE_LM_STUDIO_BASE_URL=http://127.0.0.1:1234/v1" > .env.local
    
    # Or for localhost LM Studio
    echo "VITE_LM_STUDIO_BASE_URL=http://localhost:1234/v1" > .env.local

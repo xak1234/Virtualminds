@@ -79,7 +79,7 @@ const ChatBubble: React.FC<{ message: ChatMessage; personality: Personality; onR
     return date.toLocaleString([], { year: '2-digit', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
   
-  const authorPersonality = message.authorName === personality.name ? personality : { profileImage: undefined, name: message.authorName };
+  const authorPersonality = message.authorName === personality.name ? personality : { profileImage: message.authorAvatar, name: message.authorName };
 
 
   return (
