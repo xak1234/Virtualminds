@@ -452,9 +452,9 @@ export const DraggableWindow: React.FC<DraggableWindowProps> = ({
           <span>Deceased - interactions disabled</span>
         </div>
       )}
-      <div className="flex-grow overflow-hidden p-2" onMouseDown={(e) => e.stopPropagation()}>
+      <div className="flex-grow overflow-hidden p-1" onMouseDown={(e) => e.stopPropagation()}>
         <div
-          className={`h-full w-full rounded-md border border-light-border dark:border-base-700 overflow-hidden ${
+          className={`h-full w-full rounded-lg border border-light-border dark:border-base-700 overflow-hidden ${
             isConversing && onSkipToNext && !isKilled ? 'cursor-pointer' : ''
           } ${isKilled ? 'opacity-80' : ''}`}
           onClick={() => {

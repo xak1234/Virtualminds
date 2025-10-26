@@ -36,7 +36,7 @@ interface ChatWindowProps {
 // FIX: Relaxed the personality prop to only require properties used by the component.
 // This resolves a type error when rendering avatars for secondary AI participants in a conversation.
 const AiAvatar: React.FC<{ personality: { name?: string; profileImage?: string; }; className?: string }> = ({ personality, className }) => {
-    const baseClass = "w-8 h-8 flex-shrink-0 rounded-full";
+    const baseClass = "w-6 h-6 flex-shrink-0 rounded-full";
     if (personality.profileImage) {
         return <img src={personality.profileImage} alt={personality.name || 'AI Avatar'} className={`${baseClass} object-cover ${className}`} />;
     }
@@ -47,9 +47,9 @@ const AiAvatar: React.FC<{ personality: { name?: string; profileImage?: string; 
 const ChatBubble: React.FC<{ message: ChatMessage; personality: Personality; onRepeat?: () => void; aiTextColor?: string; inputTextColor?: string; chatMessageAlpha?: number; currentUser?: string | null; }> = ({ message, personality, onRepeat, aiTextColor, inputTextColor, chatMessageAlpha, currentUser }) => {
   if (message.author === MessageAuthor.SYSTEM) {
     return (
-      <div className="text-center my-2">
+      <div className="text-center my-1.5">
         <span 
-          className="text-xs text-light-text-secondary dark:text-gray-500 px-3 py-1 rounded-full whitespace-pre-wrap"
+          className="text-xs text-light-text-secondary dark:text-gray-500 px-2.5 py-1 rounded-full whitespace-pre-wrap"
           style={{
             backgroundColor: `rgba(243, 244, 246, ${chatMessageAlpha || 1.0})`, // light mode: bg-light-panel with alpha
             ...(document.documentElement.classList.contains('dark') ? {
@@ -83,26 +83,26 @@ const ChatBubble: React.FC<{ message: ChatMessage; personality: Personality; onR
 
 
   return (
-    <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
+    <div className={`flex items-start gap-2 ${isUser ? 'flex-row-reverse' : ''} chat-message-compact message-enter`}>
       {/* Show appropriate avatar */}
       {isUser ? (
         <UserAvatar 
           username={currentUser} 
-          size="md" 
+          size="sm" 
           showRing={true}
           ringColor="ring-blue-500/50"
-          className="shadow-lg"
+          className="shadow-sm mt-0.5"
         />
       ) : (
-        <AiAvatar personality={authorPersonality} className="shadow-lg ring-2 ring-purple-500/30" />
+        <AiAvatar personality={authorPersonality} className="shadow-sm ring-1 ring-purple-500/20 mt-0.5" />
       )}
       
-      <div className="flex flex-col gap-1 max-w-[70%]">
+      <div className="flex flex-col gap-0.5 max-w-[75%]">
         <div
-          className={`px-4 py-3 rounded-2xl shadow-md user-select-text transition-all duration-200 hover:shadow-lg ${
+          className={`px-3 py-2 rounded-xl shadow-sm user-select-text transition-all duration-200 hover:shadow-md ${
             isUser
-              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-tr-none'
-              : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-none'
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-tr-md'
+              : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200 rounded-tl-md'
           }`}
           style={{
             ...(chatMessageAlpha && chatMessageAlpha < 1 ? {
@@ -115,33 +115,33 @@ const ChatBubble: React.FC<{ message: ChatMessage; personality: Personality; onR
         {!isUser && (
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <p className="whitespace-pre-wrap select-text text-sm leading-relaxed" style={aiTextColor ? { color: aiTextColor } : undefined}>{message.text}</p>
+              <p className="whitespace-pre-wrap select-text text-sm leading-snug" style={aiTextColor ? { color: aiTextColor } : undefined}>{message.text}</p>
             </div>
             {/* Repeat button for AI responses */}
             {onRepeat && (
               <button
                 onClick={onRepeat}
                 title="Repeat this response"
-                className="flex-shrink-0 p-1 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
+                className="flex-shrink-0 p-0.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 transition-colors"
               >
-                <RepeatIcon className="w-4 h-4" />
+                <RepeatIcon className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
         )}
         
         {isUser && (
-          <p className="whitespace-pre-wrap select-text text-sm leading-relaxed" style={inputTextColor ? { color: inputTextColor } : undefined}>{message.text}</p>
+          <p className="whitespace-pre-wrap select-text text-sm leading-snug" style={inputTextColor ? { color: inputTextColor } : undefined}>{message.text}</p>
         )}
         </div>
         
         {/* Timestamp and author name outside the bubble */}
-        <div className={`flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 ${isUser ? 'justify-end' : ''}`}>
+        <div className={`flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 ${isUser ? 'justify-end' : ''}`}>
           {!isUser && message.authorName && (
-            <span className="font-medium">{message.authorName}</span>
+            <span className="font-medium text-xs">{message.authorName}</span>
           )}
           {message.timestamp && (
-            <span className="opacity-70">{formatTimestamp(message.timestamp)}</span>
+            <span className="opacity-60 text-xs">{formatTimestamp(message.timestamp)}</span>
           )}
         </div>
       </div>
@@ -335,7 +335,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <>
           {/* Header is now handled by DraggableWindow */}
           <div 
-            className={`flex-1 p-6 space-y-6 ${
+            className={`flex-1 p-3 space-y-1 ${
               isDragging 
                 ? 'overflow-hidden pointer-events-none select-none' 
                 : 'overflow-y-auto'
@@ -351,9 +351,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             title={isConversing ? "Click to skip to next person" : undefined}
           >
             {!currentUser && chatHistory.length === 0 && (
-                 <div className="text-center my-2">
+                 <div className="text-center my-1.5">
                     <span 
-                      className="text-xs text-light-text-secondary dark:text-gray-500 px-3 py-1 rounded-full whitespace-pre-wrap"
+                      className="text-xs text-light-text-secondary dark:text-gray-500 px-2.5 py-1 rounded-full whitespace-pre-wrap"
                       style={{
                         backgroundColor: `rgba(243, 244, 246, ${chatMessageAlpha || 1.0})`, // light mode: bg-light-panel with alpha
                         ...(document.documentElement.classList.contains('dark') ? {
@@ -378,22 +378,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               />
             ))}
             {isLoading && (
-               <div className="flex items-start gap-3">
-                  <AiAvatar personality={personality} className="shadow-lg ring-2 ring-purple-500/30" />
-                  <div className="flex flex-col gap-1 max-w-[70%]">
+               <div className="flex items-start gap-2">
+                  <AiAvatar personality={personality} className="shadow-sm ring-1 ring-purple-500/20 mt-0.5" />
+                  <div className="flex flex-col gap-0.5 max-w-[75%]">
                     <div 
-                      className="px-4 py-3 rounded-2xl shadow-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-tl-none"
+                      className="px-3 py-2 rounded-xl shadow-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-tl-md"
                       style={{
                         ...(chatMessageAlpha && chatMessageAlpha < 1 ? {
                           opacity: chatMessageAlpha
                         } : {})
                       }}
                     >
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                          <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                         </div>
                       </div>
                     </div>
@@ -402,14 +402,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             )}
             <div ref={messagesEndRef} />
           </div>
-          <div className="p-4 border-t border-light-border dark:border-base-700">
+          <div className="p-3 border-t border-light-border dark:border-base-700">
             {isPersonalityKilled && (
-              <div className="mb-3 text-center text-xs font-mono uppercase tracking-[0.3em] text-red-600 dark:text-red-400 flex items-center justify-center gap-2">
+              <div className="mb-2 text-center text-xs font-mono uppercase tracking-[0.3em] text-red-600 dark:text-red-400 flex items-center justify-center gap-2">
                 <span className="text-sm">💀</span>
                 <span>No responses - personality deceased</span>
               </div>
             )}
-            <form onSubmit={handleSubmit} className="flex items-center gap-4">
+            <form onSubmit={handleSubmit} className="flex items-center gap-3">
               <input
                 type="text"
                 value={interim ? `${input}${input ? ' ' : ''}${interim}` : input}
@@ -420,7 +420,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   e.stopPropagation();
                 }}
                 placeholder="> /clear to clear the window"
-                className="flex-1 bg-light-panel/80 dark:bg-base-800/80 backdrop-blur-sm border border-light-border dark:border-base-600 rounded-md px-4 py-2 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 placeholder:text-green-400 placeholder:text-opacity-70"
+                className="flex-1 bg-light-panel/80 dark:bg-base-800/80 backdrop-blur-sm border border-light-border dark:border-base-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 placeholder:text-green-400 placeholder:text-opacity-70 chat-input-modern"
                 disabled={isLoading || isConversing || isPersonalityKilled}
                 style={inputTextColor ? { color: inputTextColor } : undefined}
               />
@@ -429,24 +429,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 onClick={() => {
                   if (isListening) { stopListening(false); } else { startListening(); }
                 }}
-                className={`p-2 rounded-md transition-colors duration-200 ${
+                className={`p-2 rounded-lg transition-colors duration-200 ${
                   isListening ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-black/10 dark:bg-base-700 text-light-text dark:text-gray-300 hover:bg-black/20 dark:hover:bg-base-600'
                 }`}
                 title={isListening ? 'Stop voice input' : 'Start voice input'}
                 disabled={isLoading || isConversing || isPersonalityKilled || !getSpeechRecognition()}
               >
                 {isListening ? (
-                  <MicrophoneOffIcon className="w-6 h-6" />
+                  <MicrophoneOffIcon className="w-5 h-5" />
                 ) : (
-                  <MicrophoneIcon className="w-6 h-6" />
+                  <MicrophoneIcon className="w-5 h-5" />
                 )}
               </button>
               <button
                 type="submit"
-                className="bg-primary text-white p-2 rounded-md hover:bg-blue-600 disabled:bg-base-600 disabled:cursor-not-allowed transition-colors duration-200"
+                className="bg-primary text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-base-600 disabled:cursor-not-allowed transition-colors duration-200"
                 disabled={isLoading || (!input.trim() && !interim.trim()) || isConversing || isPersonalityKilled}
               >
-                <PaperAirplaneIcon className="w-6 h-6" />
+                <PaperAirplaneIcon className="w-5 h-5" />
               </button>
             </form>
           </div>

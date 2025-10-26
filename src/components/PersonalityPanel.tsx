@@ -445,7 +445,7 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
                           ? 'text-orange-500 dark:text-orange-400' 
                           : 'text-green-600 dark:text-green-400'
                     }`}
-                    style={{ fontSize: povertyEnabled ? '0.7rem' : '1rem' }}
+                    style={{ fontSize: povertyEnabled ? '0.65rem' : '0.8rem' }}
                   >
                     {p.name}
                     {isKilled && (gangsEnabled ? ' [UNLOADED]' : ' [DECEASED]')}

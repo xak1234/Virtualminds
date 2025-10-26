@@ -266,12 +266,29 @@ export const PovertyDebugWindow: React.FC<PovertyDebugWindowProps> = ({
                 {conversations.length === 0 ? (
                   <div className="text-gray-400 italic">No conversations tracked yet</div>
                 ) : (
-                  conversations.map((conv, idx) => (
-                    <div key={idx} className="p-2 rounded bg-gray-900 border border-yellow-700/30">
-                      <div className="text-xs text-gray-400">{conv.time || new Date().toLocaleTimeString()}</div>
-                      <div className="text-sm text-gray-200">{conv.message || conv}</div>
-                    </div>
-                  ))
+                  (() => {
+                    // Group conversations by speaker, message, and time to avoid showing duplicates
+                    const groupedConversations = conversations.reduce((groups, conv) => {
+                      const key = `${conv.speakerId}-${conv.message}-${conv.time}`;
+                      if (!groups[key]) {
+                        groups[key] = {
+                          ...conv,
+                          listeners: []
+                        };
+                      }
+                      groups[key].listeners.push(conv.listenerName);
+                      return groups;
+                    }, {} as Record<string, any>);
+
+                    return Object.values(groupedConversations).map((group: any, idx) => (
+                      <div key={idx} className="p-2 rounded bg-gray-900 border border-yellow-700/30">
+                        <div className="text-xs text-gray-400">
+                          {new Date(group.time).toLocaleTimeString()} - {group.speakerName} → {group.listeners.join(', ')}
+                        </div>
+                        <div className="text-sm text-gray-200">{group.message}</div>
+                      </div>
+                    ));
+                  })()
                 )}
               </div>
             )}

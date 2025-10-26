@@ -177,7 +177,8 @@ class PovertyService {
     console.log(`  - Cash: £${status.cash_on_hand.toFixed(2)}`);
     console.log(`  - Days unemployed: ${status.days_unemployed}`);
     console.log(`  - DWP Status: ${status.struckOffBenefits ? 'STRUCK OFF' : 'ELIGIBLE'} (Approved: ${status.dwpClaimsApproved}, Denied: ${status.dwpClaimsDenied}, Fraud: ${status.falseClaims}/3)`);
-    console.log(`  - Next DWP payment due: Day ${Math.ceil((status.days_unemployed + 1) / 7) * 7} (in ${Math.ceil((status.days_unemployed + 1) / 7) * 7 - status.days_unemployed} days)`);
+    const nextDwpDay = status.days_unemployed < 1 ? 1 : Math.floor((status.days_unemployed - 1) / 7) * 7 + 8;
+    console.log(`  - Next DWP payment due: Day ${nextDwpDay} (in ${nextDwpDay - status.days_unemployed} days)`);
     console.log(`  - Next PIP payment due: Day ${Math.ceil((status.days_unemployed + 1) / 30) * 30} (in ${Math.ceil((status.days_unemployed + 1) / 30) * 30 - status.days_unemployed} days)`);
     console.log(`  - Struck off benefits: ${status.struckOffBenefits}`);
     console.log(`  - Job status: ${status.job_status}`);
@@ -249,8 +250,9 @@ class PovertyService {
     }
 
     // === WELFARE PAYMENTS (Weekly) ===
+    // Check for DWP payments on days 1, 8, 15, 22, etc. (every 7 days starting from day 1)
     console.log(`[POVERTY DEBUG] ${personalityName} - Day ${status.days_unemployed}: DWP Check - Modulo 7 = ${status.days_unemployed % 7}, Struck Off = ${status.struckOffBenefits}, Fraud Strikes = ${status.falseClaims}/3`);
-    if (status.days_unemployed % 7 === 0 && !status.struckOffBenefits) {
+    if (status.days_unemployed % 7 === 1 && !status.struckOffBenefits) {
       console.log(`[POVERTY DEBUG] ${personalityName} is eligible for DWP payment!`);
       if (Math.random() < config.fraudDetectionRate) {
         status.falseClaims += 1;
@@ -302,12 +304,12 @@ class PovertyService {
           status.totalFundsReceived += dwpPaymentAmount;
           
           dwpPayment = { amount: dwpPaymentAmount, status: 'received' };
-          console.log(`[POVERTY DEBUG] ✅ DWP Payment Generated: ${personalityName} received £${dwpPaymentAmount}`);
+          console.log(`[POVERTY DEBUG] ✅ DWP Payment Generated: ${personalityName} received £${dwpPaymentAmount} on day ${status.days_unemployed}`);
           event = {
             id: this.generateUniqueEventId('poverty-claim'),
             time: new Date().toISOString(),
             type: 'benefit_claim',
-            message: `DWP weekly payment received: £${dwpPaymentAmount}`,
+            message: `DWP weekly payment received: £${dwpPaymentAmount} (Day ${status.days_unemployed})`,
             severity: 'low',
           };
         }

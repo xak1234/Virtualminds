@@ -212,3 +212,57 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   @apply bg-cyan-500/70;
 }
+
+/* Enhanced chat window styles */
+.chat-message-compact {
+  @apply transition-all duration-200 ease-out;
+}
+
+.chat-message-compact:hover {
+  @apply transform scale-[1.01];
+}
+
+.chat-input-modern {
+  @apply transition-all duration-200 ease-out;
+}
+
+.chat-input-modern:focus {
+  @apply transform scale-[1.01] shadow-lg;
+}
+
+/* Improved message bubble animations */
+.message-enter {
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Compact loading animation */
+.loading-compact {
+  @apply flex items-center gap-1;
+}
+
+.loading-compact .dot {
+  @apply w-1.5 h-1.5 bg-current rounded-full animate-pulse;
+}
+
+/* Modern glass effect for chat windows */
+.chat-glass {
+  backdrop-filter: blur(12px) saturate(180%);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .chat-glass {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
