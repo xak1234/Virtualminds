@@ -257,14 +257,42 @@ class LocalModelService {
       
       console.log('Attempting to create WebLLM engine...');
       
-      // Initialize WebLLM engine with error handling
+      // Initialize WebLLM engine with error handling and GPU recovery
       try {
+        // Reset any existing engine first to prevent device conflicts
+        if (this.engine) {
+          try {
+            await this.engine.unload();
+          } catch (e) {
+            console.warn('Failed to unload existing engine:', e);
+          }
+          this.engine = null;
+        }
+        
         // Try to create the engine with default settings
         this.engine = new webllm.MLCEngine();
         console.log('WebLLM engine created successfully');
+        
+        // Set up device lost recovery
+        if (typeof window !== 'undefined' && window.addEventListener) {
+          window.addEventListener('beforeunload', () => {
+            if (this.engine) {
+              try {
+                this.engine.unload();
+              } catch (e) {
+                console.warn('Failed to cleanup engine on page unload:', e);
+              }
+            }
+          });
+        }
+        
       } catch (engineError: any) {
         console.error('Failed to create WebLLM engine:', engineError);
         console.error('Error stack:', engineError.stack);
+        
+        // Reset state on failure
+        this.isInitialized = false;
+        this.engine = null;
         
         // For development, let's provide a more helpful error
         throw new Error(`WebLLM initialization failed in development environment.

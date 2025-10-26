@@ -40,6 +40,7 @@ import { apiKeyService } from './services/apiKeyService';
 import { validateAllKeys } from './services/apiKeyValidationService';
 import { assignVoiceIdToPersonality } from './services/voiceMappingService';
 import { voiceIdRegistry } from './services/voiceIdRegistryService';
+import { localStorageCleanup } from './services/localStorageCleanupService';
 import { sanitizeCliCommandForDisplay, findClosestCommand } from './services/cliCommandUtils';
 import { documentationService } from './services/documentationService';
 import { DEFAULT_MODEL, CLI_COMMANDS, HELP_MESSAGE, DEFAULT_PROVIDER, DEFAULT_CONFIG, AVAILABLE_MODELS, THEME_STORAGE_KEY, STARFIELD_ENABLED_STORAGE_KEY, STARFIELD_COUNT_STORAGE_KEY, STARFIELD_SPEED_STORAGE_KEY, SHOOTING_STARS_ENABLED_STORAGE_KEY, CLI_SHORTCUTS, TTS_PROVIDER_STORAGE_KEY, ELEVENLABS_API_KEY_STORAGE_KEY, OPENAI_TTS_API_KEY_STORAGE_KEY, GEMINI_TTS_API_KEY_STORAGE_KEY, GLOBAL_TTS_ENABLED_STORAGE_KEY, EXPORT_PATH_STORAGE_KEY, DEFAULT_EXPORT_PATH, OPENAI_CHAT_API_KEY_STORAGE_KEY, GEMINI_API_KEY_STORAGE_KEY, API_PROVIDER_STORAGE_KEY, CURRENT_MODEL_STORAGE_KEY, CURRENT_LOCAL_MODEL_STORAGE_KEY, CLI_SHADOW_ENABLED_STORAGE_KEY, CHAT_INPUT_COLOR_STORAGE_KEY, CHAT_AI_COLOR_STORAGE_KEY, CLI_FONT_COLOR_STORAGE_KEY, CLI_BG_COLOR_STORAGE_KEY, CHAT_WINDOW_BG_COLOR_STORAGE_KEY, CHAT_WINDOW_ALPHA_STORAGE_KEY, CHAT_MESSAGE_ALPHA_STORAGE_KEY, LINK_ALL_ON_STARTUP_STORAGE_KEY, MODEL_CONFIG_STORAGE_KEY, PERSONALITY_SLOTS_STORAGE_KEY, DESKTOP_BACKGROUND_STORAGE_KEY, PERSONALITY_PANEL_BG_COLOR_STORAGE_KEY, PERSONALITY_PANEL_BORDER_COLOR_STORAGE_KEY, PERSONALITY_PANEL_FONT_COLOR_STORAGE_KEY, AVAILABLE_BACKGROUNDS } from './constants';
@@ -226,8 +227,12 @@ const App: React.FC = () => {
     settingsSaveTimeoutRef.current = setTimeout(() => {
       try {
         const settingsToSave = JSON.stringify(experimentalSettings);
-        localStorage.setItem('experimental-settings', settingsToSave);
-        console.log('[EXPERIMENTAL SETTINGS] Saved to localStorage - gangsEnabled:', experimentalSettings.gangsEnabled);
+        const saved = localStorageCleanup.safeSetItem('experimental-settings', settingsToSave);
+        if (saved) {
+          console.log('[EXPERIMENTAL SETTINGS] Saved to localStorage - gangsEnabled:', experimentalSettings.gangsEnabled);
+        } else {
+          console.warn('[EXPERIMENTAL SETTINGS] Failed to save - localStorage quota exceeded');
+        }
         if (experimentalSettings.gangsEnabled && experimentalSettings.gangsConfig) {
           console.log('[EXPERIMENTAL SETTINGS] Gang settings saved:', {
             numberOfGangs: experimentalSettings.gangsConfig.numberOfGangs,
@@ -366,11 +371,11 @@ const App: React.FC = () => {
     if (experimentalSettings.povertyEnabled && desktopBackground !== 'poverty.png') {
       console.log('[POVERTY] Poverty mode enabled - switching background to poverty.png');
       setDesktopBackground('poverty.png');
-      localStorage.setItem(DESKTOP_BACKGROUND_STORAGE_KEY, 'poverty.png');
+      localStorageCleanup.safeSetItem(DESKTOP_BACKGROUND_STORAGE_KEY, 'poverty.png');
     } else if (!experimentalSettings.povertyEnabled && desktopBackground === 'poverty.png') {
       console.log('[POVERTY] Poverty mode disabled - switching background back to background.png');
       setDesktopBackground('background.png');
-      localStorage.setItem(DESKTOP_BACKGROUND_STORAGE_KEY, 'background.png');
+      localStorageCleanup.safeSetItem(DESKTOP_BACKGROUND_STORAGE_KEY, 'background.png');
     }
   }, [experimentalSettings.povertyEnabled]);
 
@@ -1404,10 +1409,9 @@ const App: React.FC = () => {
       // Keep only last 1000 CLI messages to prevent memory issues
       const trimmed = updated.length > 1000 ? updated.slice(-1000) : updated;
       // Save to localStorage for persistence
-      try {
-        localStorage.setItem('cmf_cli_history', JSON.stringify(trimmed));
-      } catch (error) {
-        console.warn('Failed to save CLI history to localStorage:', error);
+      const saved = localStorageCleanup.safeSetItem('cmf_cli_history', JSON.stringify(trimmed));
+      if (!saved) {
+        console.warn('Failed to save CLI history - localStorage quota exceeded');
       }
       return trimmed;
     });
@@ -2201,7 +2205,7 @@ const openWindow = (personalityId: string) => {
     // Stagger window positions deterministically to avoid overlap and keep the header reachable
     const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const defaultW = 600;
+    const defaultW = 450; // Reduced by 25% from 600px
     const defaultH = 700;
     const pad = 80;
     const step = 36; // stagger step in px
@@ -3512,6 +3516,7 @@ const isGuiSource = source === 'gui' || source === 'converse';
     }
 
     console.log('[POVERTY] Starting simulation advancement system (20 seconds = 1 day)');
+    let lastAdvancementTime = Date.now();
 
     const advanceInterval = setInterval(() => {
       if (activePersonalities.length === 0) {
@@ -3519,10 +3524,22 @@ const isGuiSource = source === 'gui' || source === 'converse';
         return;
       }
 
-      // Don't advance during active conversations
-      if (conversingPersonalityIds.length > 0) {
-        console.log('[POVERTY] Skipping advancement during conversation');
-        return;
+      // Force advancement if it's been too long (60 seconds max delay)
+      const timeSinceLastAdvancement = Date.now() - lastAdvancementTime;
+      const forceAdvancement = timeSinceLastAdvancement > 60000;
+
+      // Allow advancement even during conversations, but reduce frequency
+      if (conversingPersonalityIds.length > 0 && !forceAdvancement) {
+        // During conversations, only advance 25% of the time to reduce interruptions
+        if (Math.random() > 0.25) {
+          console.log('[POVERTY] Skipping advancement during conversation (random skip)');
+          return;
+        }
+        console.log('[POVERTY] Advancing during conversation (25% chance)');
+      }
+
+      if (forceAdvancement) {
+        console.log('[POVERTY] Forcing advancement - too much time has passed');
       }
 
       try {
@@ -3562,6 +3579,9 @@ const isGuiSource = source === 'gui' || source === 'converse';
           }
 
           console.log(`[POVERTY] Advanced to day ${newConfig.currentSimulationDay} of ${newConfig.povertyDurationDays}`);
+
+          // Update last advancement time
+          lastAdvancementTime = Date.now();
 
           return {
             ...prev,
@@ -3684,10 +3704,7 @@ const isGuiSource = source === 'gui' || source === 'converse';
       addGangConversation(source.id, source.name, target.id, target.name, initialMessage);
     }
     
-    if (experimentalSettings.povertyEnabled && initialMessage) {
-      console.log('[POVERTY] Tracking initial 2-person message:', source.name, '→', target.name);
-      addPovertyConversation(source.id, source.name, target.id, target.name, initialMessage);
-    }
+    // Removed duplicate poverty log here; responses are logged when generated
 
     for (let i = 0; i < maxTurns * 2; i++) {
         // Check if conversation was interrupted
@@ -4461,16 +4478,7 @@ Speak in first person only - no action descriptions, no asterisks, no third-pers
                   response
                 );
                 
-                // Record conversation for poverty debug monitor (group conversations)
-                if (experimentalSettings.povertyEnabled) {
-                  addPovertyConversation(
-                    currentSpeaker.id,
-                    currentSpeaker.name,
-                    listener.id,
-                    listener.name,
-                    response
-                  );
-                }
+                // Removed duplicate poverty log here; already logged after generating response
                 
                 if (gangInteractionResult.event) {
                   // Replace personality IDs with names in the event message
@@ -7759,7 +7767,7 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           <div className="relative z-10 max-w-md w-full mx-auto p-8 bg-light-panel/90 dark:bg-base-800/90 rounded-lg border border-light-border dark:border-base-700 shadow-2xl backdrop-blur-md">
             <div className="text-center mb-8">
               <h1 className="font-mono text-3xl font-light text-light-text dark:text-gray-100 tracking-wide uppercase mb-2">
-                VIRTUAL MINDS FRAMEWORK V23
+                VIRTUAL MINDS FRAMEWORK V24
               </h1>
               <p className="text-sm text-light-text-secondary dark:text-gray-400">
                 Login Required

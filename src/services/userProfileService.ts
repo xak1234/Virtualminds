@@ -6,7 +6,7 @@ export interface UserProfile {
   username: string;
   loadedPersonalities: string[];
   lastLogin: string;
-  personalityData: Personality[]; // Full personality data for backup
+  personalityNames?: string[]; // Just names for reference, not full data
 }
 
 const USER_PROFILES_STORAGE_KEY = 'criminal_minds_user_profiles';
@@ -21,7 +21,7 @@ export const saveUserProfile = (username: string, loadedPersonalities: Personali
       username,
       loadedPersonalities: loadedPersonalities.map(p => p.id),
       lastLogin: new Date().toISOString(),
-      personalityData: loadedPersonalities // Store full personality data as backup
+      personalityNames: loadedPersonalities.map(p => p.name) // Store only names for reference
     };
     
     profiles[username] = profile;

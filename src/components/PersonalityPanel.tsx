@@ -437,13 +437,16 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
               </div>
               <div className="flex flex-col flex-1 min-w-0">
                 <div className="flex items-center gap-1">
-                  <span className={`truncate font-medium text-base border border-light-border dark:border-base-600 rounded px-2 py-1 border-b-2 ${
-                    isKilled 
-                      ? (gangsEnabled ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-500 line-through') 
-                      : memberStatus?.imprisoned 
-                        ? 'text-orange-500 dark:text-orange-400' 
-                        : 'text-green-600 dark:text-green-400'
-                  }`}>
+                  <span 
+                    className={`truncate font-medium border border-light-border dark:border-base-600 rounded px-2 py-1 border-b-2 ${
+                      isKilled 
+                        ? (gangsEnabled ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-500 line-through') 
+                        : memberStatus?.imprisoned 
+                          ? 'text-orange-500 dark:text-orange-400' 
+                          : 'text-green-600 dark:text-green-400'
+                    }`}
+                    style={{ fontSize: povertyEnabled ? '0.7rem' : '1rem' }}
+                  >
                     {p.name}
                     {isKilled && (gangsEnabled ? ' [UNLOADED]' : ' [DECEASED]')}
                     {memberStatus?.imprisoned && !isKilled && ' [SOLITARY]'}

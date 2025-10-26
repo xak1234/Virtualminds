@@ -507,30 +507,55 @@ const playAudioBlob = async (
   try {
     audioElement.pause();
     audioElement.currentTime = 0; // Reset playback position
+    
+    // Revoke any existing blob URL to prevent memory leaks
+    if (audioElement.src && audioElement.src.startsWith('blob:')) {
+      URL.revokeObjectURL(audioElement.src);
+    }
+    
     audioElement.src = '';
     audioElement.load(); // Reset the element
   } catch (e) {
     console.warn('[TTS] Failed to reset audio element:', e);
   }
   
-  // Longer delay to ensure the previous audio is fully cleared and prevent race conditions
-  await new Promise(resolve => setTimeout(resolve, 50));
+  // Increased delay to ensure the previous audio is fully cleared and prevent race conditions
+  // This helps prevent the "first few words repetition" issue
+  await new Promise(resolve => setTimeout(resolve, 100));
   
   // Create audio URL with multiple fallback methods
   let audioUrl: string;
+  
+  // Detect Firefox and use data URL by default to avoid blob URL security issues
+  const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
+  
   try {
-    // Method 1: Try blob URL (fastest)
+    if (isFirefox) {
+      // Firefox has issues with blob URLs for audio - use data URL directly
+      console.log('[TTS] Firefox detected - using data URL for better compatibility');
+      throw new Error('Using data URL for Firefox compatibility');
+    }
+    
+    // Method 1: Try blob URL (fastest) for non-Firefox browsers
     if (providerUsed === TtsProvider.ELEVENLABS) {
       // Create a new blob with explicit audio/mpeg type to ensure browser compatibility
       const audioBlob = new Blob([blob], { type: 'audio/mpeg' });
       audioUrl = URL.createObjectURL(audioBlob);
     } else {
-      audioUrl = URL.createObjectURL(blob);
+      // For other providers, preserve original type or default to audio/mpeg
+      const blobType = blob.type || 'audio/mpeg';
+      const audioBlob = new Blob([blob], { type: blobType });
+      audioUrl = URL.createObjectURL(audioBlob);
     }
     
     // Validate the URL was created successfully
-    if (!audioUrl || audioUrl === 'blob:') {
-      throw new Error('Blob URL creation failed');
+    if (!audioUrl || audioUrl === 'blob:' || audioUrl.trim() === '') {
+      throw new Error('Blob URL creation failed - empty or invalid URL');
+    }
+    
+    // Additional validation for blob URLs - check for proper blob URL format
+    if (!audioUrl.startsWith('blob:http') && !audioUrl.startsWith('blob:https')) {
+      throw new Error(`Invalid blob URL format: ${audioUrl}`);
     }
     
     console.log('[TTS] Created blob URL:', audioUrl.substring(0, 50) + '...');
@@ -648,6 +673,13 @@ const playAudioBlob = async (
   }, 10000); // 10 second timeout
 
   // Now set the source - this will trigger loading
+  if (!audioUrl || audioUrl.trim() === '') {
+    console.error('[TTS] Empty audioUrl, cannot set src');
+    onError?.('Failed to create audio URL');
+    finalizeSpeech(providerUsed, options?.speakerId);
+    return;
+  }
+  
   audioElement.src = audioUrl;
   audioElement.load(); // Explicitly trigger load
 
@@ -1405,6 +1437,9 @@ export const speak = async (
       if (isCurrentlySpeaking && isSpeaking) {
         console.log(`[TTS] Canceling current speech from ${speakerId} to play new message`);
         await cancelCurrentAudio(false); // Don't fade out - interrupt immediately
+        
+        // Add a small delay after cancellation to prevent audio overlap
+        await new Promise(resolve => setTimeout(resolve, 150));
       }
     }
   }
@@ -1426,6 +1461,11 @@ export const speak = async (
     
     // Check if new text is a prefix of queued text or vice versa
     // (e.g., "Hello, I think..." vs "Hello, I think we should...")
+    // Also check for similar beginnings (first 10 words) to catch repetitions
+    const queuedWords = queuedText.split(' ').slice(0, 10);
+    const newWords = normalizedText.split(' ').slice(0, 10);
+    const minWords = Math.min(queuedWords.length, newWords.length);
+    
     if (queuedText.startsWith(normalizedText) || normalizedText.startsWith(queuedText)) {
       console.log('[TTS] Detected prefix/overlap:', {
         queued: queuedText.substring(0, 50) + '...',
@@ -1433,6 +1473,21 @@ export const speak = async (
         speakerId
       });
       return true;
+    }
+    
+    // Check if first 5+ words are identical (catches repetition of beginnings)
+    if (minWords >= 5) {
+      const matchingWords = queuedWords.slice(0, minWords).join(' ');
+      const newMatchingWords = newWords.slice(0, minWords).join(' ');
+      if (matchingWords === newMatchingWords) {
+        console.log('[TTS] Detected similar beginning (first words match):', {
+          queued: queuedText.substring(0, 50) + '...',
+          new: normalizedText.substring(0, 50) + '...',
+          matchingWords: matchingWords,
+          speakerId
+        });
+        return true;
+      }
     }
     
     // Check for substantial overlap (80% similarity at the start)

@@ -1,6 +1,7 @@
 
 import type { UserData } from '../types';
 import { LOCAL_STORAGE_KEY } from '../constants';
+import { localStorageCleanup } from './localStorageCleanupService';
 
 export const getUsers = (): Record<string, UserData> => {
   try {
@@ -13,18 +14,13 @@ export const getUsers = (): Record<string, UserData> => {
 };
 
 export const saveUsers = (users: Record<string, UserData>): void => {
-  try {
-    const data = JSON.stringify(users);
-    localStorage.setItem(LOCAL_STORAGE_KEY, data);
-  } catch (error) {
-    // Suppress repeated quota exceeded errors to reduce console spam
-    if (error instanceof Error && error.name === 'QuotaExceededError') {
-      // Only log occasionally to avoid flooding console
-      if (Math.random() < 0.1) {
-        console.warn("localStorage quota exceeded - user data cannot be saved. Please clear some browser data.");
-      }
-    } else {
-      console.error("Failed to save user data to localStorage", error);
+  const data = JSON.stringify(users);
+  const saved = localStorageCleanup.safeSetItem(LOCAL_STORAGE_KEY, data);
+  
+  if (!saved) {
+    // Only log occasionally to avoid flooding console
+    if (Math.random() < 0.1) { // 10% chance to log
+      console.warn("localStorage quota exceeded - user data cannot be saved. Please clear some browser data.");
     }
   }
 };

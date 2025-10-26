@@ -162,6 +162,8 @@ export const ApiDebugWindow: React.FC<ApiDebugWindowProps> = ({
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
     };
   }, [isDragging, isResizing, position, size]);
 

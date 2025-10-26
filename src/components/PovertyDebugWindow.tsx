@@ -165,6 +165,8 @@ export const PovertyDebugWindow: React.FC<PovertyDebugWindowProps> = ({
       document.removeEventListener('touchend', onUp);
       document.removeEventListener('touchcancel', onUp);
       document.body.style.touchAction = '';
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
     };
   }, [isDragging, isResizing, dragOffset, pos, size, isMinimized]);
 

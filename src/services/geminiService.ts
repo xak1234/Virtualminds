@@ -46,7 +46,7 @@ const initializeGemini = async (): Promise<GoogleGenAI> => {
   }
 
   if (!apiKey) {
-    throw new Error("Gemini API key not available from server or environment variables");
+    throw new Error("Gemini API key not set. Please configure it in Settings (⚙️) → API Keys → Gemini API Key");
   }
 
   // Cache the API key and create the client
@@ -139,29 +139,36 @@ export const generateResponse = async (
     const inputTokens = estimateTokenCount(inputText);
 
     if (error instanceof Error && error.message) {
-        try {
-            // The API sometimes returns a JSON string in the error message
-            const errorData = JSON.parse(error.message);
-            if (errorData.error) {
-                if (errorData.error.status === 'RESOURCE_EXHAUSTED') {
-                    errorMessage = "AI Quota Error: You have exceeded your current Gemini API quota. Please check your plan and billing details on the Google AI Studio website.";
-                } else if (errorData.error.message && errorData.error.message.includes('safety')) {
-                    // Provide transparent error without suggesting topic avoidance
-                    errorMessage = `API Safety Filter Triggered: ${errorData.error.message}. Note: Safety filters are disabled in configuration but may still trigger at API level. This is an API limitation, not an application restriction.`;
+        // Check for API key related errors
+        if (error.message.includes('API key') || error.message.includes('authentication') || error.message.includes('401')) {
+            errorMessage = "Gemini API Key Error: Invalid or expired API key. Please check your API key in settings.";
+            // Clear the cached client to force re-initialization
+            clearGeminiCache();
+        } else {
+            try {
+                // The API sometimes returns a JSON string in the error message
+                const errorData = JSON.parse(error.message);
+                if (errorData.error) {
+                    if (errorData.error.status === 'RESOURCE_EXHAUSTED') {
+                        errorMessage = "AI Quota Error: You have exceeded your current Gemini API quota. Please check your plan and billing details on the Google AI Studio website.";
+                    } else if (errorData.error.message && errorData.error.message.includes('safety')) {
+                        // Provide transparent error without suggesting topic avoidance
+                        errorMessage = `API Safety Filter Triggered: ${errorData.error.message}. Note: Safety filters are disabled in configuration but may still trigger at API level. This is an API limitation, not an application restriction.`;
+                    } else {
+                        errorMessage = `Gemini API Error: ${errorData.error.message || 'An unknown API error occurred.'}`;
+                    }
                 } else {
-                    errorMessage = `Gemini API Error: ${errorData.error.message || 'An unknown API error occurred.'}`;
+                    errorMessage = `Error: ${error.message}`;
                 }
-            } else {
-                errorMessage = `Error: ${error.message}`;
-            }
-        } catch (e) {
-            // Check for safety-related errors in the raw message
-            if (error.message.toLowerCase().includes('safety') || 
-                error.message.toLowerCase().includes('blocked') ||
-                error.message.toLowerCase().includes('harmful')) {
-                errorMessage = `API Safety Filter Triggered: ${error.message}. Note: This is an API-level limitation, not an application restriction. All safety settings are disabled in the configuration.`;
-            } else {
-                errorMessage = `Error: ${error.message}`;
+            } catch (e) {
+                // Check for safety-related errors in the raw message
+                if (error.message.toLowerCase().includes('safety') || 
+                    error.message.toLowerCase().includes('blocked') ||
+                    error.message.toLowerCase().includes('harmful')) {
+                    errorMessage = `API Safety Filter Triggered: ${error.message}. Note: This is an API-level limitation, not an application restriction. All safety settings are disabled in the configuration.`;
+                } else {
+                    errorMessage = `Error: ${error.message}`;
+                }
             }
         }
     }

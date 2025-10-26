@@ -1,5 +1,6 @@
 import type { ApiUsageStats } from '../types';
 import type { ApiProvider } from '../types';
+import { localStorageCleanup } from './localStorageCleanupService';
 
 // API pricing (as of late 2024/early 2025)
 // These rates are estimates and should be updated based on current pricing
@@ -208,17 +209,15 @@ export const logApiUsage = (
       log.splice(0, log.length - 500);
     }
 
-    localStorage.setItem('cmf_api_usage_log', JSON.stringify(log));
-  } catch (error) {
-    // Suppress repeated quota exceeded errors to reduce console spam
-    if (error instanceof Error && error.name === 'QuotaExceededError') {
+    const saved = localStorageCleanup.safeSetItem('cmf_api_usage_log', JSON.stringify(log));
+    if (!saved) {
       // Only log occasionally to avoid flooding console
-      if (Math.random() < 0.1) {
+      if (Math.random() < 0.1) { // 10% chance to log
         console.warn('localStorage quota exceeded - API usage logging disabled. Please clear browser data.');
       }
-    } else {
-      console.error('Failed to log API usage:', error);
     }
+  } catch (error) {
+    console.error('Failed to log API usage:', error);
   }
 };
 

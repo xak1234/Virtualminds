@@ -28,7 +28,7 @@ class PovertyService {
       pipBaseAmount: 40, // Increased from 15 to 40 per month
       jobFindRate: 0.15,
       averageWagePerJob: 80,
-      fraudDetectionRate: 0.1,
+      fraudDetectionRate: 0.05, // Reduced from 0.1 to 0.05 (5% instead of 10%)
       // Daily expense settings
       baseRentPerDay: 15,
       baseFoodCostPerDay: 8,
@@ -282,7 +282,7 @@ class PovertyService {
         }
       } else {
         // Weekly payment = baseWelfareAmount * 7 days (now 50 * 7 = £350 per week)
-        const dwpPaymentAmount = Math.random() > 0.2 ? config.baseWelfareAmount * 7 : 0;
+        const dwpPaymentAmount = Math.random() > 0.1 ? config.baseWelfareAmount * 7 : 0; // Increased success rate from 80% to 90%
         
         if (dwpPaymentAmount === 0) {
           status.dwpClaimsDenied += 1;
@@ -366,8 +366,8 @@ class PovertyService {
     // === PIP CLAIMS (Monthly) ===
     const pipEligible = status.days_unemployed % 30 === 0 && !status.struckOffBenefits;
     const pipChance = Math.random();
-    console.log(`[POVERTY DEBUG] ${personalityName} - Day ${status.days_unemployed}: PIP Check - Modulo 30 = ${status.days_unemployed % 30}, Struck Off = ${status.struckOffBenefits}, Chance = ${pipChance.toFixed(3)} (need < 0.3)`);
-    if (pipEligible && pipChance < 0.3) {
+    console.log(`[POVERTY DEBUG] ${personalityName} - Day ${status.days_unemployed}: PIP Check - Modulo 30 = ${status.days_unemployed % 30}, Struck Off = ${status.struckOffBenefits}, Chance = ${pipChance.toFixed(3)} (need < 0.7)`);
+    if (pipEligible && pipChance < 0.7) { // Increased chance from 0.3 to 0.7 (70% chance)
       console.log(`[POVERTY DEBUG] ${personalityName} is attempting PIP claim!`);
       // Chance to claim PIP based on health/mental health issues
       const pipClaimSuccess = status.health < 60 || status.psychologicalStability < 50;

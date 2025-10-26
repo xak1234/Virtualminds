@@ -148,6 +148,8 @@ export const DraggableWindow: React.FC<DraggableWindowProps> = ({
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
     };
   }, [isDragging, isResizing, position.x, position.y, size.width, size.height, onResize]);
 

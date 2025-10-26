@@ -204,6 +204,8 @@ export const GangDebugWindow: React.FC<GangDebugWindowProps> = ({
       document.removeEventListener('touchend', onUp);
       document.removeEventListener('touchcancel', onUp);
       document.body.style.touchAction = '';
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
     };
   }, [isDragging, isResizing, dragOffset, pos, size, isMinimized]);
 
