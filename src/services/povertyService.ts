@@ -7,6 +7,12 @@ import type { PovertyConfig, PovertyEvent, PovertyPersonalityStatus, Personality
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
 class PovertyService {
+  private eventCounter = 0;
+
+  private generateUniqueEventId(prefix: string): string {
+    return `${prefix}-${Date.now()}-${++this.eventCounter}`;
+  }
+
   public getDefaultConfig(): PovertyConfig {
     return {
       povertyEnabled: false,
@@ -157,6 +163,15 @@ class PovertyService {
     let pipPayment: { amount: number; status: 'awarded' | 'refused' } | undefined;
     let pubVisit: { activity: string } | undefined;
 
+    // Debug logging
+    const personality = allPersonalities.find(p => p.id === personalityStatus.personalityId);
+    const personalityName = personality?.name || personalityStatus.personalityId;
+    console.log(`[POVERTY DEBUG] Simulating day for ${personalityName}:`);
+    console.log(`  - Days unemployed: ${status.days_unemployed}`);
+    console.log(`  - Cash on hand: £${status.cash_on_hand.toFixed(2)}`);
+    console.log(`  - Struck off benefits: ${status.struckOffBenefits}`);
+    console.log(`  - Job status: ${status.job_status}`);
+
     // Reset daily variables at start of day
     status.income_today = 0;
     status.expenses_today = 0;
@@ -224,7 +239,9 @@ class PovertyService {
     }
 
     // === WELFARE PAYMENTS (Weekly) ===
+    console.log(`[POVERTY DEBUG] Checking DWP eligibility: days_unemployed % 7 = ${status.days_unemployed % 7}, struckOff = ${status.struckOffBenefits}`);
     if (status.days_unemployed % 7 === 0 && !status.struckOffBenefits) {
+      console.log(`[POVERTY DEBUG] ${personalityName} is eligible for DWP payment!`);
       if (Math.random() < config.fraudDetectionRate) {
         status.falseClaims += 1;
         
@@ -275,6 +292,7 @@ class PovertyService {
           status.totalFundsReceived += dwpPaymentAmount;
           
           dwpPayment = { amount: dwpPaymentAmount, status: 'received' };
+          console.log(`[POVERTY DEBUG] ✅ DWP Payment Generated: ${personalityName} received £${dwpPaymentAmount}`);
           event = {
             id: `poverty-claim-${Date.now()}`,
             time: new Date().toISOString(),
@@ -305,7 +323,9 @@ class PovertyService {
     }
     
     // Random pub visits - can happen regardless of stress level
-    if (Math.random() < 0.15 && status.cash_on_hand > 10) {
+    const pubChance = Math.random();
+    console.log(`[POVERTY DEBUG] Checking pub visit: chance = ${pubChance.toFixed(3)} (need < 0.15), cash = £${status.cash_on_hand.toFixed(2)} (need > £10)`);
+    if (pubChance < 0.15 && status.cash_on_hand > 10) {
       const activities = [
         'Drinking alone at the bar',
         'Playing darts with regulars',
@@ -320,7 +340,9 @@ class PovertyService {
         'Having a meal at the pub',
         'Meeting friends for drinks'
       ];
-      pubVisit = { activity: activities[Math.floor(Math.random() * activities.length)] };
+      const selectedActivity = activities[Math.floor(Math.random() * activities.length)];
+      pubVisit = { activity: selectedActivity };
+      console.log(`[POVERTY DEBUG] 🍺 Pub Visit Generated: ${personalityName} - ${selectedActivity}`);
     }
     
     if (status.stressLevel > 60) {
@@ -332,9 +354,14 @@ class PovertyService {
     }
 
     // === PIP CLAIMS (Monthly) ===
-    if (status.days_unemployed % 30 === 0 && !status.struckOffBenefits && Math.random() < 0.3) {
+    const pipEligible = status.days_unemployed % 30 === 0 && !status.struckOffBenefits;
+    const pipChance = Math.random();
+    console.log(`[POVERTY DEBUG] Checking PIP eligibility: days_unemployed % 30 = ${status.days_unemployed % 30}, struckOff = ${status.struckOffBenefits}, chance = ${pipChance.toFixed(3)} (need < 0.3)`);
+    if (pipEligible && pipChance < 0.3) {
+      console.log(`[POVERTY DEBUG] ${personalityName} is attempting PIP claim!`);
       // Chance to claim PIP based on health/mental health issues
       const pipClaimSuccess = status.health < 60 || status.psychologicalStability < 50;
+      console.log(`[POVERTY DEBUG] PIP claim success check: health = ${status.health.toFixed(0)} (need < 60), mental = ${status.psychologicalStability.toFixed(0)} (need < 50), success = ${pipClaimSuccess}`);
       // Monthly PIP payment = pipBaseAmount * 30 days (now 40 * 30 = £1200 per month)
       const pipAmount = pipClaimSuccess ? config.pipBaseAmount * 30 : 0;
       
@@ -344,9 +371,11 @@ class PovertyService {
         status.cash_on_hand += pipAmount;
         status.totalFundsReceived += pipAmount;
         pipPayment = { amount: pipAmount, status: 'awarded' };
+        console.log(`[POVERTY DEBUG] 🏥 PIP Payment Generated: ${personalityName} awarded £${pipAmount}`);
       } else {
         status.pipClaimsDenied += 1;
         pipPayment = { amount: 0, status: 'refused' };
+        console.log(`[POVERTY DEBUG] ❌ PIP Payment Denied: ${personalityName} claim refused`);
       }
     }
 
@@ -598,14 +627,14 @@ class PovertyService {
       
       const crisisMessage = crisisTypes[Math.floor(Math.random() * crisisTypes.length)];
       
-      events.push({
-        id: `poverty-crisis-${Date.now()}`,
-        time: new Date().toISOString(),
-        type: 'random_crisis',
-        message: `🌍 CRISIS: ${crisisMessage}`,
-        severity: 'high',
-        involvedPersonalities: activeStatuses.map(([id]) => id)
-      });
+        events.push({
+          id: this.generateUniqueEventId('poverty-crisis'),
+          time: new Date().toISOString(),
+          type: 'random_crisis',
+          message: `🌍 CRISIS: ${crisisMessage}`,
+          severity: 'high',
+          involvedPersonalities: activeStatuses.map(([id]) => id)
+        });
 
       // Increase stress for all active personalities
       activeStatuses.forEach(([id, status]) => {
@@ -627,7 +656,7 @@ class PovertyService {
         status.ejectionDay = config.currentSimulationDay;
         
         events.push({
-          id: `poverty-ejection-homeless-${personalityId}-${Date.now()}`,
+          id: this.generateUniqueEventId(`poverty-ejection-homeless-${personalityId}`),
           time: new Date().toISOString(),
           type: 'homeless_ejection',
           message: `💀 ${personality.name} has been EJECTED - forced onto streets permanently`,
@@ -646,7 +675,7 @@ class PovertyService {
         status.ejectionDay = config.currentSimulationDay;
         
         events.push({
-          id: `poverty-ejection-job-${personalityId}-${Date.now()}`,
+          id: this.generateUniqueEventId(`poverty-ejection-job-${personalityId}`),
           time: new Date().toISOString(),
           type: 'job_success_ejection',
           message: `✅ ${personality.name} has ESCAPED POVERTY - got stable job and leaving the simulation`,
@@ -675,7 +704,7 @@ class PovertyService {
         const eventMessage = stressEvents[Math.floor(Math.random() * stressEvents.length)];
         
         events.push({
-          id: `poverty-stress-${personalityId}-${Date.now()}`,
+          id: this.generateUniqueEventId(`poverty-stress-${personalityId}`),
           time: new Date().toISOString(),
           type: 'random_crisis',
           message: `${personality.name}: ${eventMessage}`,

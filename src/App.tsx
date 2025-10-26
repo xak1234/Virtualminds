@@ -2999,6 +2999,65 @@ const isGuiSource = source === 'gui' || source === 'converse';
       console.log('[POVERTY] Tracking autonomous conversation:', fromPersonality.name, '→', toPersonality.name);
       addPovertyConversation(fromPersonalityId, fromPersonality.name, toPersonalityId, toPersonality.name, message);
     }
+
+    // Simulate poverty day for both personalities if poverty mode is enabled (autonomous conversations)
+    if (experimentalSettings.povertyEnabled && experimentalSettings.povertyConfig) {
+      console.log('[POVERTY DEBUG] Poverty mode enabled, simulating day for autonomous conversation participants');
+      console.log('[POVERTY DEBUG] Source:', fromPersonality.name, 'Target:', toPersonality.name);
+      console.log('[POVERTY DEBUG] Available personality statuses:', Object.keys(experimentalSettings.povertyConfig.personalityStatus));
+      [fromPersonality, toPersonality].forEach(personality => {
+        const currentStatus = experimentalSettings.povertyConfig!.personalityStatus[personality.id];
+        console.log(`[POVERTY DEBUG] Checking ${personality.name} (${personality.id}) - has status: ${!!currentStatus}`);
+        if (currentStatus) {
+          console.log(`[POVERTY DEBUG] Running simulation for ${personality.name} (${personality.id})`);
+          const { status: updatedStatus, event: povertyEvent, dwpPayment, pipPayment, pubVisit } = povertyService.simulateDay(
+            experimentalSettings.povertyConfig!,
+            currentStatus,
+            activePersonalities
+          );
+          
+          // Update the status
+          setExperimentalSettings(prev => ({
+            ...prev,
+            povertyConfig: {
+              ...prev.povertyConfig!,
+              personalityStatus: {
+                ...prev.povertyConfig!.personalityStatus,
+                [personality.id]: updatedStatus
+              }
+            }
+          }));
+          
+          // Track events
+          if (povertyEvent) {
+            console.log('[POVERTY]', povertyEvent.message);
+            setPovertyEvents(prev => [...prev, povertyEvent]);
+          }
+          
+          // Track DWP payment
+          if (dwpPayment) {
+            console.log(`[POVERTY DEBUG] Adding DWP payment to monitor: ${personality.name} - £${dwpPayment.amount} (${dwpPayment.status})`);
+            addPovertyDwpPayment(personality.id, personality.name, dwpPayment.amount, dwpPayment.status);
+          }
+          
+          // Track PIP payment
+          if (pipPayment) {
+            console.log(`[POVERTY DEBUG] Adding PIP payment to monitor: ${personality.name} - £${pipPayment.amount} (${pipPayment.status})`);
+            addPovertyPipPayment(personality.id, personality.name, pipPayment.amount, pipPayment.status);
+          }
+          
+          // Track pub visit
+          if (pubVisit) {
+            console.log(`[POVERTY DEBUG] Adding pub visit to monitor: ${personality.name} - ${pubVisit.activity}`);
+            addPovertyPubVisit(personality.id, personality.name, pubVisit.activity);
+          }
+        } else {
+          console.log(`[POVERTY DEBUG] ${personality.name} (${personality.id}) has no poverty status - skipping simulation`);
+        }
+      });
+    } else {
+      console.log(`[POVERTY DEBUG] Poverty mode disabled or not configured: enabled=${experimentalSettings.povertyEnabled}, config=${!!experimentalSettings.povertyConfig}`);
+    }
     
     // Trigger TTS for the sender's message if TTS is enabled
     const sessionTts = windows.find(w => w.personalityId === fromPersonalityId)?.sessionTtsEnabled 
@@ -3723,9 +3782,14 @@ const isGuiSource = source === 'gui' || source === 'converse';
 
         // Simulate poverty day for both personalities if poverty mode is enabled
         if (experimentalSettings.povertyEnabled && experimentalSettings.povertyConfig) {
+          console.log('[POVERTY DEBUG] Poverty mode enabled, simulating day for conversation participants');
+          console.log('[POVERTY DEBUG] Source:', source.name, 'Target:', target.name);
+          console.log('[POVERTY DEBUG] Available personality statuses:', Object.keys(experimentalSettings.povertyConfig.personalityStatus));
           [source, target].forEach(personality => {
             const currentStatus = experimentalSettings.povertyConfig!.personalityStatus[personality.id];
+            console.log(`[POVERTY DEBUG] Checking ${personality.name} (${personality.id}) - has status: ${!!currentStatus}`);
             if (currentStatus) {
+              console.log(`[POVERTY DEBUG] Running simulation for ${personality.name} (${personality.id})`);
               const { status: updatedStatus, event: povertyEvent, dwpPayment, pipPayment, pubVisit } = povertyService.simulateDay(
                 experimentalSettings.povertyConfig!,
                 currentStatus,
@@ -3752,20 +3816,27 @@ const isGuiSource = source === 'gui' || source === 'converse';
               
               // Track DWP payment
               if (dwpPayment) {
+                console.log(`[POVERTY DEBUG] Adding DWP payment to monitor: ${personality.name} - £${dwpPayment.amount} (${dwpPayment.status})`);
                 addPovertyDwpPayment(personality.id, personality.name, dwpPayment.amount, dwpPayment.status);
               }
               
               // Track PIP payment
               if (pipPayment) {
+                console.log(`[POVERTY DEBUG] Adding PIP payment to monitor: ${personality.name} - £${pipPayment.amount} (${pipPayment.status})`);
                 addPovertyPipPayment(personality.id, personality.name, pipPayment.amount, pipPayment.status);
               }
               
               // Track pub visit
               if (pubVisit) {
+                console.log(`[POVERTY DEBUG] Adding pub visit to monitor: ${personality.name} - ${pubVisit.activity}`);
                 addPovertyPubVisit(personality.id, personality.name, pubVisit.activity);
               }
+            } else {
+              console.log(`[POVERTY DEBUG] ${personality.name} (${personality.id}) has no poverty status - skipping simulation`);
             }
           });
+        } else {
+          console.log(`[POVERTY DEBUG] Poverty mode disabled or not configured: enabled=${experimentalSettings.povertyEnabled}, config=${!!experimentalSettings.povertyConfig}`);
         }
 
         // Apply experimental settings for verbosity
