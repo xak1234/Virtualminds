@@ -214,7 +214,7 @@ export const Header: React.FC<HeaderProps> = ({
       
       <div className="lg:ml-64">
         <h1 className="font-mono text-2xl sm:text-4xl font-light text-light-text dark:text-gray-100 tracking-wide uppercase">
-          VIRTUAL MINDS FRAMEWORK V23
+          VIRTUAL MINDS FRAMEWORK V24
           <span className="ml-2 text-[9px] sm:text-[10px] text-light-text-secondary dark:text-gray-400 font-mono normal-case tracking-wide">
             Exploring artificial personalities
           </span>

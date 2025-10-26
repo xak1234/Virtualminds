@@ -853,7 +853,8 @@ const App: React.FC = () => {
     speakerName: string,
     listenerId: string,
     listenerName: string,
-    message: string
+    message: string,
+    sharedTimestamp?: string
   ) => {
     const settings = experimentalSettingsRef.current;
     if (!settings.povertyEnabled) {
@@ -863,7 +864,7 @@ const App: React.FC = () => {
     
     const conv = {
       id: generateUUID(),
-      time: new Date().toISOString(),
+      time: sharedTimestamp || new Date().toISOString(),
       speakerId,
       speakerName,
       listenerId,
@@ -3571,6 +3572,42 @@ const isGuiSource = source === 'gui' || source === 'converse';
             }
           });
           
+          // === ADVANCE ALL ACTIVE PERSONALITIES ===
+          // This runs simulateDay for each personality to process DWP/PIP payments, expenses, etc.
+          activePersonalities.forEach(personality => {
+            const currentStatus = newConfig.personalityStatus[personality.id];
+            if (currentStatus && !currentStatus.ejectedFromSimulation) {
+              const { status: updatedStatus, event: povertyEvent, dwpPayment, pipPayment, pubVisit } = povertyService.simulateDay(
+                newConfig,
+                currentStatus,
+                activePersonalities
+              );
+              
+              // Update the status
+              newConfig.personalityStatus[personality.id] = updatedStatus;
+              
+              // Track payments
+              if (dwpPayment) {
+                console.log(`[POVERTY DEBUG] Adding DWP payment: ${personality.name} - £${dwpPayment.amount} (${dwpPayment.status})`);
+                addPovertyDwpPayment(personality.id, personality.name, dwpPayment.amount, dwpPayment.status);
+              }
+              
+              if (pipPayment) {
+                console.log(`[POVERTY DEBUG] Adding PIP payment: ${personality.name} - £${pipPayment.amount} (${pipPayment.status})`);
+                addPovertyPipPayment(personality.id, personality.name, pipPayment.amount, pipPayment.status);
+              }
+              
+              if (pubVisit) {
+                addPovertyPubVisit(personality.id, personality.name, pubVisit.activity);
+              }
+              
+              // Log events
+              if (povertyEvent) {
+                setPovertyEvents(prev => [...prev, povertyEvent]);
+              }
+            }
+          });
+          
           // Check if we've reached the end of the 90-day simulation
           if (newConfig.currentSimulationDay >= newConfig.povertyDurationDays) {
             console.log(`[POVERTY] Simulation complete! Reached day ${newConfig.currentSimulationDay} of ${newConfig.povertyDurationDays}`);
@@ -4407,9 +4444,11 @@ Speak in first person only - no action descriptions, no asterisks, no third-pers
             if (Math.random() < 0.1) {
               console.log('[POVERTY] Tracking group conversation from:', currentSpeaker.id, currentSpeaker.name, 'to', participants.length - 1, 'listeners');
             }
+            // Use a shared timestamp for all listeners to prevent duplicates in UI
+            const sharedTimestamp = new Date().toISOString();
             participants.forEach(listener => {
               if (listener.id !== currentSpeaker.id) {
-                addPovertyConversation(currentSpeaker.id, currentSpeaker.name, listener.id, listener.name, response);
+                addPovertyConversation(currentSpeaker.id, currentSpeaker.name, listener.id, listener.name, response, sharedTimestamp);
               }
             });
           }

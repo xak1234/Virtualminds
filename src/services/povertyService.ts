@@ -24,7 +24,7 @@ class PovertyService {
       povertyEndDate: 0,
       currentSimulationDay: 0,
       // Economic settings
-      baseWelfareAmount: 50, // Increased from 25 to 50 per week
+      baseWelfareAmount: 50, // Historical reference (legacy - DWP payments now use fixed £150 per fortnight)
       pipBaseAmount: 40, // Increased from 15 to 40 per month
       jobFindRate: 0.15,
       averageWagePerJob: 80,
@@ -177,7 +177,7 @@ class PovertyService {
     console.log(`  - Cash: £${status.cash_on_hand.toFixed(2)}`);
     console.log(`  - Days unemployed: ${status.days_unemployed}`);
     console.log(`  - DWP Status: ${status.struckOffBenefits ? 'STRUCK OFF' : 'ELIGIBLE'} (Approved: ${status.dwpClaimsApproved}, Denied: ${status.dwpClaimsDenied}, Fraud: ${status.falseClaims}/3)`);
-    const nextDwpDay = status.days_unemployed < 1 ? 1 : Math.floor((status.days_unemployed - 1) / 7) * 7 + 8;
+    const nextDwpDay = status.days_unemployed < 1 ? 1 : Math.floor((status.days_unemployed - 1) / 14) * 14 + 15;
     console.log(`  - Next DWP payment due: Day ${nextDwpDay} (in ${nextDwpDay - status.days_unemployed} days)`);
     console.log(`  - Next PIP payment due: Day ${Math.ceil((status.days_unemployed + 1) / 30) * 30} (in ${Math.ceil((status.days_unemployed + 1) / 30) * 30 - status.days_unemployed} days)`);
     console.log(`  - Struck off benefits: ${status.struckOffBenefits}`);
@@ -249,10 +249,12 @@ class PovertyService {
       }
     }
 
-    // === WELFARE PAYMENTS (Weekly) ===
-    // Check for DWP payments on days 1, 8, 15, 22, etc. (every 7 days starting from day 1)
-    console.log(`[POVERTY DEBUG] ${personalityName} - Day ${status.days_unemployed}: DWP Check - Modulo 7 = ${status.days_unemployed % 7}, Struck Off = ${status.struckOffBenefits}, Fraud Strikes = ${status.falseClaims}/3`);
-    if (status.days_unemployed % 7 === 1 && !status.struckOffBenefits) {
+    // === WELFARE PAYMENTS (Fortnightly - Every 14 days) ===
+    // Check for DWP payments on days 1, 15, 29, 43, etc. (every 14 days starting from day 1)
+    // NOTE: days_unemployed is incremented BEFORE this check, so we need to check modulo 14 === 1
+    // This means payments happen on days 1, 15, 29, 43, etc.
+    console.log(`[POVERTY DEBUG] ${personalityName} - Day ${status.days_unemployed}: DWP Check - Modulo 14 = ${status.days_unemployed % 14}, Struck Off = ${status.struckOffBenefits}, Fraud Strikes = ${status.falseClaims}/3`);
+    if (status.days_unemployed % 14 === 1 && !status.struckOffBenefits) {
       console.log(`[POVERTY DEBUG] ${personalityName} is eligible for DWP payment!`);
       if (Math.random() < config.fraudDetectionRate) {
         status.falseClaims += 1;
@@ -279,12 +281,13 @@ class PovertyService {
             message: `DWP fraud investigation - Warning ${status.falseClaims}/3 strikes`,
             severity: 'high',
           };
-          const penalty = Math.floor(config.baseWelfareAmount * 3.5);
+          // Penalty is half of one fortnightly payment (£150 / 2 = £75)
+          const penalty = 75;
           status.cash_on_hand = Math.max(0, status.cash_on_hand - penalty);
         }
       } else {
-        // Weekly payment = baseWelfareAmount * 7 days (now 50 * 7 = £350 per week)
-        const dwpPaymentAmount = Math.random() > 0.1 ? config.baseWelfareAmount * 7 : 0; // Increased success rate from 80% to 90%
+        // Fortnightly payment = £150 per fortnight (every 14 days)
+        const dwpPaymentAmount = Math.random() > 0.1 ? 150 : 0; // Increased success rate from 80% to 90%
         
         if (dwpPaymentAmount === 0) {
           status.dwpClaimsDenied += 1;
@@ -309,7 +312,7 @@ class PovertyService {
             id: this.generateUniqueEventId('poverty-claim'),
             time: new Date().toISOString(),
             type: 'benefit_claim',
-            message: `DWP weekly payment received: £${dwpPaymentAmount} (Day ${status.days_unemployed})`,
+            message: `DWP fortnightly payment received: £${dwpPaymentAmount} (Day ${status.days_unemployed})`,
             severity: 'low',
           };
         }
@@ -366,7 +369,8 @@ class PovertyService {
     }
 
     // === PIP CLAIMS (Monthly) ===
-    const pipEligible = status.days_unemployed % 30 === 0 && !status.struckOffBenefits;
+    // PIP payments happen on days 30, 60, 90, etc. (every 30 days)
+    const pipEligible = status.days_unemployed > 0 && status.days_unemployed % 30 === 0 && !status.struckOffBenefits;
     const pipChance = Math.random();
     console.log(`[POVERTY DEBUG] ${personalityName} - Day ${status.days_unemployed}: PIP Check - Modulo 30 = ${status.days_unemployed % 30}, Struck Off = ${status.struckOffBenefits}, Chance = ${pipChance.toFixed(3)} (need < 0.7)`);
     if (pipEligible && pipChance < 0.7) { // Increased chance from 0.3 to 0.7 (70% chance)
