@@ -28,6 +28,7 @@ interface CliProps {
   currentUser?: string | null;
   shadowEnabled?: boolean; // when true, disable CLI autoscroll
   conversationTopic?: string | null; // current conversation topic
+  isLlmConversationMode?: boolean; // when true, CLI is in LLM communication mode
 }
 
 export const Cli: React.FC<CliProps> = ({ 
@@ -50,7 +51,8 @@ export const Cli: React.FC<CliProps> = ({
   cliBgColor,
   currentUser,
   shadowEnabled = false,
-  conversationTopic = null
+  conversationTopic = null,
+  isLlmConversationMode = false
 }) => {
   const [input, setInput] = useState('');
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
@@ -779,7 +781,9 @@ export const Cli: React.FC<CliProps> = ({
     }
   };
   
-  const promptSymbol = cliFocusedPersonalityName ? 
+  const promptSymbol = isLlmConversationMode ? 
+    <span className="text-blue-500 dark:text-blue-400 font-semibold">LLM &gt;</span> :
+    cliFocusedPersonalityName ? 
     <span>(<span className="text-green-600 dark:text-green-400">{cliFocusedPersonalityName}</span>)</span> : 
     '$';
 
@@ -1441,6 +1445,9 @@ ${'='.repeat(80)}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             className="bg-transparent border-none flex-1 focus:outline-none ml-2"
+            style={{ 
+              color: isLlmConversationMode ? '#3b82f6' : (cliFontColor || undefined) 
+            }}
             placeholder={cliFocusedPersonalityName ? "Type a message, 'exit', or '!command'..." : "Type a command... (e.g., help)"}
             autoComplete="off"
           />

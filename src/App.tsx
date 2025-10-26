@@ -30,7 +30,7 @@ import { generateResponse as generateOpenAiResponse, getAvailableModels, type Op
 import { claudeCliService, type ClaudeControlContext } from './services/claudeCliService';
 import { localModelService, type LocalModelResponse } from './services/localModelService';
 import { createChatCompletion, formatChat } from './services/llamaCppService';
-import { saveLmStudioUrl, getSavedLmStudioUrl, getCurrentBaseUrl, generateResponse as generateLmStudioResponse, testConnection as testLmStudioConnection } from './services/lmStudioService';
+import { saveLmStudioUrl, getSavedLmStudioUrl, getCurrentBaseUrl, generateResponse as generateLmStudioResponse, testConnection as testLmStudioConnection, testSpecificUrl } from './services/lmStudioService';
 import * as userService from './services/userService';
 import * as personalityService from './services/personalityService';
 import * as userProfileService from './services/userProfileService';
@@ -5496,21 +5496,56 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           break;
         }
         
-        // Validate IP:Port format
-        const ipPortRegex = /^(?:https?:\/\/)?(?:\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}|localhost|[\w.-]+):(\d{1,5})(?:\/.*)?$/;
-        if (!ipPortRegex.test(urlArg)) {
-          commandResponse('Error: Invalid format. Use IP:PORT (e.g., 127.0.0.1:1234)', CliOutputType.ERROR);
+        // Validate IP:Port format with proper IP address validation
+        const validateIpAddress = (ip: string): boolean => {
+          const octets = ip.split('.');
+          if (octets.length !== 4) return false;
+          return octets.every(octet => {
+            const num = parseInt(octet, 10);
+            return !isNaN(num) && num >= 0 && num <= 255 && octet === num.toString();
+          });
+        };
+        
+        const ipPortRegex = /^(?:https?:\/\/)?([^:]+):(\d{1,5})(?:\/.*)?$/;
+        const match = urlArg.match(ipPortRegex);
+        
+        if (!match) {
+          commandResponse('❌ Invalid format. Use IP:PORT or HOSTNAME:PORT (e.g., 127.0.0.1:1234)');
           break;
         }
         
+        const [, host, port] = match;
+        const portNum = parseInt(port, 10);
+        
+        // Validate port range
+        if (portNum < 1 || portNum > 65535) {
+          commandResponse('❌ Port must be between 1 and 65535');
+          break;
+        }
+        
+        // Validate IP address if it looks like an IP (contains only digits and dots)
+        if (/^\d+\.\d+\.\d+\.\d+$/.test(host) && !validateIpAddress(host)) {
+          commandResponse('❌ Invalid IP address. Each octet must be 0-255');
+          break;
+        }
+        
+        // Test connection to the provided address before saving
+        commandResponse(`Testing connection to ${urlArg}...`);
         try {
+          const isLive = await testSpecificUrl(urlArg);
+          if (!isLive) {
+            commandResponse('❌ LLM address not active');
+            break;
+          }
+          
+          // Connection successful, save the URL
           saveLmStudioUrl(urlArg);
           const newUrl = getCurrentBaseUrl();
           commandResponse(`✅ LM Studio URL updated to: ${urlArg}`);
           commandResponse(`   Active URL: ${newUrl}`);
           commandResponse('   Settings saved to user profile.');
         } catch (error) {
-          commandResponse(`Error saving LM Studio URL: ${error instanceof Error ? error.message : 'Unknown error'}`, CliOutputType.ERROR);
+          commandResponse(`Error saving LM Studio URL: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
         break;
       }
@@ -7818,6 +7853,7 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
               cliBgColor={cliBgColor}
               currentUser={currentUser}
               shadowEnabled={cliShadowEnabled}
+              isLlmConversationMode={isLlmConversationMode}
             />
           </div>
         </div>
@@ -8322,6 +8358,7 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
               currentUser={currentUser}
               shadowEnabled={cliShadowEnabled}
               conversationTopic={currentConversationTopic}
+              isLlmConversationMode={isLlmConversationMode}
               onHeightChange={(delta) => {
                 const newHeight = cliHeight + delta;
                 const minHeight = 80;

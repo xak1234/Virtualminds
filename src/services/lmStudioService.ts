@@ -148,6 +148,48 @@ export async function testConnection(signal?: AbortSignal): Promise<boolean> {
   }
 }
 
+export async function testSpecificUrl(url: string, signal?: AbortSignal): Promise<boolean> {
+  try {
+    // Format the URL similar to how saveLmStudioUrl does it
+    let formattedUrl = url.trim();
+    
+    // Add http:// if no protocol specified
+    if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+      formattedUrl = `http://${formattedUrl}`;
+    }
+    
+    // Remove trailing slash and add /v1 for testing
+    formattedUrl = formattedUrl.replace(/\/$/, '').replace(/\/v1$/, '');
+    const testUrl = `${formattedUrl}/v1`;
+    
+    // Create a timeout controller for 2.5 seconds
+    const timeoutController = new AbortController();
+    const timeoutId = setTimeout(() => timeoutController.abort(), 2500);
+    
+    // Use the provided signal or the timeout signal
+    const effectiveSignal = signal || timeoutController.signal;
+    
+    try {
+      const res = await fetch(`${testUrl}/models`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        signal: effectiveSignal,
+      });
+      
+      clearTimeout(timeoutId);
+      return res.ok;
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
+    }
+  } catch (error) {
+    console.error('LM Studio connection test failed for URL:', url, error);
+    return false;
+  }
+}
+
 export function formatChat(
   systemInstruction: string | undefined, 
   history: { role: 'user' | 'assistant'; content: string }[], 
