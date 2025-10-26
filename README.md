@@ -90,8 +90,8 @@ A cutting-edge framework for creating, managing, and simulating complex AI perso
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/yourusername/virtual-minds-framework.git
-cd virtual-minds-framework
+git clone https://github.com/xak1234/Virtualminds.git
+cd virtualminds
 
 # 2. Install dependencies
 npm install
