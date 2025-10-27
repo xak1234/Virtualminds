@@ -181,29 +181,29 @@ Make your next move in standard algebraic notation (e.g., e4, Nf3, Qxd5). Only r
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
       <div className="w-full h-full max-w-[95vw] max-h-[90vh] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl shadow-2xl overflow-hidden flex flex-col border-2 border-cyan-500/20" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="flex justify-between items-center px-6 py-4 border-b-2 border-cyan-500/30 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur">
-          <div>
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-2">
-              ♟️ Chess Battle
+        <div className="flex justify-between items-center px-3 sm:px-6 py-3 sm:py-4 border-b-2 border-cyan-500/30 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent flex items-center gap-1 sm:gap-2">
+              ♟️ <span className="hidden xs:inline">Chess Battle</span><span className="xs:hidden">Chess</span>
             </h2>
-            <p className="text-base text-gray-300 mt-1">
-              <span className="text-cyan-400 font-semibold">You (White)</span> vs <span className="text-purple-400 font-semibold">{personality.name} (Black)</span>
+            <p className="text-sm sm:text-base text-gray-300 mt-1 truncate">
+              <span className="text-cyan-400 font-semibold">You (White)</span> vs <span className="text-purple-400 font-semibold truncate">{personality.name} (Black)</span>
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2 flex-shrink-0">
             <button 
               onClick={() => setIsMinimized(true)} 
-              className="text-gray-400 hover:text-cyan-400 transition-all hover:scale-110"
+              className="text-gray-400 hover:text-cyan-400 transition-all hover:scale-110 p-1"
               title="Minimize (Pause Game)"
             >
-              <MinimizeIcon className="w-6 h-6" />
+              <MinimizeIcon className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
             <button 
               onClick={onClose} 
-              className="text-gray-400 hover:text-white transition-all hover:rotate-90 hover:scale-110"
+              className="text-gray-400 hover:text-white transition-all hover:rotate-90 hover:scale-110 p-1"
               title="Close Game"
             >
-              <CloseIcon className="w-7 h-7" />
+              <CloseIcon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
             </button>
           </div>
         </div>

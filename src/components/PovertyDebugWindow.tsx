@@ -208,9 +208,12 @@ export const PovertyDebugWindow: React.FC<PovertyDebugWindowProps> = ({
         }}
       >
         <div className="w-24"></div>
-        <div className="flex items-center justify-center gap-2 font-mono font-bold flex-1">
-          <span className="text-xl">💰</span>
-          <span>POVERTY MONITOR</span>
+        <div className="flex items-center justify-center gap-1 sm:gap-2 font-mono font-bold flex-1">
+          <span className="text-lg sm:text-xl">💰</span>
+          <span className="text-sm sm:text-base">
+            <span className="hidden sm:inline">POVERTY MONITOR</span>
+            <span className="sm:hidden">POVERTY</span>
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <button

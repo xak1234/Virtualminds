@@ -1040,34 +1040,38 @@ ${'='.repeat(80)}
         </div>
       )}
       <header className="bg-light-panel dark:bg-base-800 px-2 py-1 text-[10px] text-light-text-secondary dark:text-gray-400 border-b border-light-border dark:border-base-700 flex justify-between items-center leading-tight" style={{ backgroundColor: cliBgColor || undefined, color: cliFontColor || undefined }}>
-        <div className="flex items-center gap-3">
-          <span>CMF Command Line {isMaximized ? '(Maximized)' : ''}</span>
+        <div className="flex items-center gap-1 sm:gap-3 min-w-0 flex-1">
+          <span className="hidden sm:inline">CMF Command Line {isMaximized ? '(Maximized)' : ''}</span>
+          <span className="sm:hidden font-medium">CLI</span>
           {currentModel && apiProvider && (
-            <span className="text-primary font-medium">
+            <span className="text-primary font-medium hidden md:inline">
               [{apiProvider.toUpperCase()}: {formatModelName(currentModel, apiProvider)}]
             </span>
           )}
           {(ttsProvider || ttsStatusLabel) && (
-            <span className="text-primary font-medium">
+            <span className="text-primary font-medium hidden lg:inline">
               {' '}[TTS: {ttsStatusLabel ?? formatTtsProvider(ttsProvider)}]
             </span>
           )}
           {conversationTopic && (
-            <span className="text-accent font-medium">
+            <span className="text-accent font-medium hidden lg:inline truncate">
               {' '}[Topic: {conversationTopic}]
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-            <span className="text-xs opacity-60">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            <span className="text-xs opacity-60 hidden sm:inline">
               {cliFocusedPersonalityName ? '! for commands | ' : ''}↑↓ or Ctrl+↑↓ History | Tab Complete | Ctrl+E Toggle View | Ctrl+F Search | Esc Shrink/Close{currentUser === 'admin' ? ' | . for Claude' : ''}
+            </span>
+            <span className="text-xs opacity-60 sm:hidden">
+              {cliFocusedPersonalityName ? '!' : ''}↑↓ | Tab | Esc
             </span>
           
           {/* Error/Warning Controls */}
-          <div className="flex items-center gap-1 border-l border-light-border dark:border-base-600 pl-2">
+          <div className="flex items-center gap-1 border-l border-light-border dark:border-base-600 pl-1 sm:pl-2">
             <button
               onClick={toggleErrorWarningMode}
-              className={`p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs flex items-center gap-1 ${
+              className={`p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs flex items-center gap-1 ${
                 isErrorWarningMode ? 'bg-red-500 text-white' : ''
               }`}
               title={`${isErrorWarningMode ? 'Show Standard Messages' : 'Show Errors/Warnings'} (Ctrl+E)`}
@@ -1076,13 +1080,25 @@ ${'='.repeat(80)}
                 const { errors, warnings } = getErrorWarningCounts();
                 const total = errors + warnings;
                 if (isErrorWarningMode) {
-                  return '📋 Standard';
+                  return (
+                    <>
+                      <span className="hidden sm:inline">📋 Standard</span>
+                      <span className="sm:hidden">📋</span>
+                    </>
+                  );
                 }
-                if (total === 0) return '🟢 Clean';
+                if (total === 0) {
+                  return (
+                    <>
+                      <span className="hidden sm:inline">🟢 Clean</span>
+                      <span className="sm:hidden">🟢</span>
+                    </>
+                  );
+                }
                 return (
                   <>
-                    {errors > 0 && <span className="text-red-400">❌{errors}</span>}
-                    {warnings > 0 && <span className="text-yellow-400">⚠️{warnings}</span>}
+                    {errors > 0 && <span className="text-red-400">❌<span className="hidden xs:inline">{errors}</span></span>}
+                    {warnings > 0 && <span className="text-yellow-400">⚠️<span className="hidden xs:inline">{warnings}</span></span>}
                   </>
                 );
               })()} 
@@ -1091,7 +1107,7 @@ ${'='.repeat(80)}
               <select
                 value={errorWarningFilter}
                 onChange={(e) => setErrorWarningFilter(e.target.value as 'all' | 'errors' | 'warnings')}
-                className="p-1 text-xs bg-transparent border border-light-border dark:border-base-600 rounded"
+                className="p-0.5 sm:p-1 text-xs bg-transparent border border-light-border dark:border-base-600 rounded hidden xs:block"
                 title="Filter error/warning types"
               >
                 <option value="all">All Issues</option>
@@ -1102,66 +1118,74 @@ ${'='.repeat(80)}
           </div>
 
           {/* Search and Scroll Controls */}
-          <div className="flex items-center gap-1 border-l border-light-border dark:border-base-600 pl-2">
-            <button
-              onClick={toggleSearchMode}
-              className={`p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs ${isSearchMode ? 'bg-primary text-white' : ''}`}
-              title="Search CLI history (Ctrl+F)"
-            >
-              🔍 Search
-            </button>
+          <div className="flex items-center gap-1 border-l border-light-border dark:border-base-600 pl-1 sm:pl-2">
+            {currentUser && (
+              <button
+                onClick={toggleSearchMode}
+                className={`p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs ${isSearchMode ? 'bg-primary text-white' : ''}`}
+                title="Search CLI history (Ctrl+F)"
+              >
+                <span className="hidden sm:inline">🔍 Search</span>
+                <span className="sm:hidden">🔍</span>
+              </button>
+            )}
             <button
               onClick={scrollToTop}
-              className="p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs"
+              className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs hidden xs:inline-block"
               title="Scroll to top (Home)"
             >
-              ⬆️ Top
+              <span className="hidden sm:inline">⬆️ Top</span>
+              <span className="sm:hidden">⬆️</span>
             </button>
             <button
               onClick={scrollToBottom}
-              className="p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs"
+              className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs hidden xs:inline-block"
               title="Scroll to bottom (End)"
             >
-              ⬇️ Bottom
+              <span className="hidden sm:inline">⬇️ Bottom</span>
+              <span className="sm:hidden">⬇️</span>
             </button>
             {isScrollLocked && (
               <span className="text-xs text-yellow-600 dark:text-yellow-400">
-                📌 Locked
+                <span className="hidden sm:inline">📌 Locked</span>
+                <span className="sm:hidden">📌</span>
               </span>
             )}
           </div>
 
           {/* Copy and Save CLI History Buttons */}
-          {history.length > 0 && (
-            <div className="flex items-center gap-1 border-l border-light-border dark:border-base-600 pl-2">
+          {currentUser && history.length > 0 && (
+            <div className="flex items-center gap-1 border-l border-light-border dark:border-base-600 pl-1 sm:pl-2 hidden sm:flex">
               <button
                 onClick={copyCliHistory}
-                className="p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs"
+                className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs"
                 title="Copy CLI history to clipboard"
               >
-                📋 Copy
+                <span className="hidden md:inline">📋 Copy</span>
+                <span className="md:hidden">📋</span>
               </button>
               <button
                 onClick={saveCliHistory}
-                className="p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs"
+                className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs"
                 title="Save CLI history as file"
               >
-                💾 Save
+                <span className="hidden md:inline">💾 Save</span>
+                <span className="md:hidden">💾</span>
               </button>
             </div>
           )}
           {!isMaximized && onHeightChange && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 hidden sm:flex">
               <button
                 onClick={() => onHeightChange(50)}
-                className="p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
+                className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
                 title="Extend CLI Up (+50px)"
               >
                 <PlusIcon className="w-3 h-3" />
               </button>
               <button
                 onClick={() => onHeightChange(-50)}
-                className="p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
+                className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
                 title="Shrink CLI Down (-50px)"
               >
                 <MinimizeIcon className="w-3 h-3" />
@@ -1171,7 +1195,7 @@ ${'='.repeat(80)}
           {onMaximizeToggle && (
             <button
               onClick={onMaximizeToggle}
-              className="p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
+              className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
               title={isMaximized ? 'Restore' : 'Maximize'}
             >
               <MinimizeIcon className={`w-3 h-3 ${isMaximized ? 'rotate-180' : ''}`} />

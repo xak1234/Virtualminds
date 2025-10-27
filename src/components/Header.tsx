@@ -200,23 +200,25 @@ export const Header: React.FC<HeaderProps> = ({
   const deadCount = Math.max(configDeaths, sessionDeaths);
 
   return (
-    <header className="bg-light-panel dark:bg-base-800 border-b border-light-border dark:border-base-700 p-3 flex justify-between items-center shrink-0 relative z-10">
+    <header className="bg-light-panel dark:bg-base-800 border-b border-light-border dark:border-base-700 p-2 sm:p-3 flex justify-between items-center shrink-0 relative z-10">
       {/* Hamburger Menu Button - Visible only on mobile/tablet */}
       {onMobileMenuToggle && (
         <button
           onClick={onMobileMenuToggle}
-          className="lg:hidden p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary mr-2"
+          className="lg:hidden p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary mr-1 sm:mr-2 flex-shrink-0"
           aria-label="Toggle mobile menu"
         >
-          <MenuIcon className="w-6 h-6 text-white" />
+          <MenuIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
       )}
       
-      <div className="lg:ml-64">
-        <h1 className="font-mono text-2xl sm:text-4xl font-light text-light-text dark:text-gray-100 tracking-wide uppercase">
-          VIRTUAL MINDS FRAMEWORK
-          <span className="ml-2 text-[9px] sm:text-[10px] text-light-text-secondary dark:text-gray-400 font-mono normal-case tracking-wide">
-            Exploring artificial personalities
+      <div className="lg:ml-64 flex-1 min-w-0">
+        <h1 className="font-mono text-lg sm:text-2xl lg:text-4xl font-light text-light-text dark:text-gray-100 tracking-wide uppercase truncate">
+          <span className="hidden xs:inline">VIRTUAL MINDS FRAMEWORK</span>
+          <span className="xs:hidden">VM FRAMEWORK</span>
+          <span className="ml-1 sm:ml-2 text-xs sm:text-sm lg:text-base text-light-text-secondary dark:text-gray-400 font-mono normal-case tracking-normal block xs:inline">
+            <span className="hidden sm:inline">Exploring artificial personalities</span>
+            <span className="sm:hidden">AI Personalities</span>
           </span>
         </h1>
         {povertyEnabled && povertyConfig && (
@@ -225,42 +227,44 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
         {gangsEnabled && (
-          <div className="mt-1 flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-red-600 dark:text-red-500 font-mono text-lg font-bold tracking-wider animate-pulse">
-                🔒 GANGS ACTIVE
+          <div className="mt-1 flex items-center gap-2 sm:gap-4 flex-wrap">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-red-600 dark:text-red-500 font-mono text-sm sm:text-lg font-bold tracking-wider animate-pulse">
+                🔒 <span className="hidden xs:inline">GANGS ACTIVE</span><span className="xs:hidden">GANGS</span>
               </span>
-              <span className="text-xs text-red-600/70 dark:text-red-500/70 font-mono">
+              <span className="hidden sm:inline text-xs text-red-600/70 dark:text-red-500/70 font-mono">
                 Prison Environment Simulation Running
               </span>
             </div>
 
-            {/* Territory Pie Chart */}
-            <TerritoryPieChart
-              gangsConfig={gangsConfig}
-              className="ml-2"
-              deadCount={deadCount}
-            />
+            {/* Territory Pie Chart - Hidden on very small screens */}
+            <div className="hidden sm:block">
+              <TerritoryPieChart
+                gangsConfig={gangsConfig}
+                className="ml-2"
+                deadCount={deadCount}
+              />
+            </div>
           </div>
         )}
         {povertyEnabled && (
-          <div className="mt-1 flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-red-600 dark:text-red-500 font-mono text-lg font-bold tracking-wider animate-pulse">
-                🍺 POVERTY ACTIVE
+          <div className="mt-1 flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-red-600 dark:text-red-500 font-mono text-sm sm:text-lg font-bold tracking-wider animate-pulse">
+                🍺 <span className="hidden xs:inline">POVERTY ACTIVE</span><span className="xs:hidden">POVERTY</span>
               </span>
-              <span className="text-xs text-red-600/70 dark:text-red-500/70 font-mono">
+              <span className="hidden sm:inline text-xs text-red-600/70 dark:text-red-500/70 font-mono">
                 Poverty Environment Simulation Running
               </span>
             </div>
           </div>
         )}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 flex-shrink-0">
         {currentUser && (
-          <div className="flex items-center gap-2 text-sm text-white">
-            <UserIcon className="w-5 h-5 text-white"/>
-            <span className="font-medium">{currentUser}</span>
+          <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-white">
+            <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-white"/>
+            <span className="font-medium hidden xs:inline truncate max-w-20 sm:max-w-none">{currentUser}</span>
           </div>
         )}
         
@@ -268,22 +272,22 @@ export const Header: React.FC<HeaderProps> = ({
         {gangsEnabled && onGangDebugClick && (
           <button
             onClick={onGangDebugClick}
-            className="p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-900/30 border border-red-600/50"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-900/30 border border-red-600/50"
             aria-label="Gang Debug Window"
             title="Open Gang Debug Window"
           >
-            <PrisonIcon className="w-6 h-6 text-red-400 animate-pulse" />
+            <PrisonIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 animate-pulse" />
           </button>
         )}
         
         {gangsEnabled && onGangSettingsClick && (
           <button
             onClick={onGangSettingsClick}
-            className="p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-orange-900/30 border border-orange-600/50"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-orange-900/30 border border-orange-600/50"
             aria-label="Gang Settings"
             title="Open Gang Settings"
           >
-            <GangIcon className="w-6 h-6 text-orange-400" />
+            <GangIcon className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
           </button>
         )}
         
@@ -293,11 +297,11 @@ export const Header: React.FC<HeaderProps> = ({
               // Auto-proceed: Disable gang mode without confirmation
               onGangModeDisableAndStop();
             }}
-            className="p-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-600 border-2 border-red-500 animate-pulse"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-600 border-2 border-red-500 animate-pulse"
             aria-label="Disable Gang Mode & Stop"
             title="👊 Gangs Mode ON - Click to Turn OFF & Stop"
           >
-            <FistIcon className="w-6 h-6 text-white" />
+            <FistIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </button>
         )}
 
@@ -305,63 +309,63 @@ export const Header: React.FC<HeaderProps> = ({
         {povertyEnabled && onPovertyDebugClick && (
           <button
             onClick={onPovertyDebugClick}
-            className="p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-900/30 border border-yellow-600/50"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-900/30 border border-yellow-600/50"
             aria-label="Poverty Debug Window"
             title="Open Poverty Debug Window"
           >
-            <span className="text-2xl">📊</span>
+            <span className="text-lg sm:text-2xl">📊</span>
           </button>
         )}
 
         {povertyEnabled && onPovertySettingsClick && (
           <button
             onClick={onPovertySettingsClick}
-            className="p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-900/30 border border-yellow-600/50"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-900/30 border border-yellow-600/50"
             aria-label="Poverty Settings"
             title="Configure Poverty Simulation"
           >
-            <span className="text-2xl">💸</span>
+            <span className="text-lg sm:text-2xl">💸</span>
           </button>
         )}
 
         {povertyEnabled && onPovertyDisable && (
           <button
             onClick={onPovertyDisable}
-            className="p-2 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-600 border-2 border-yellow-500 animate-pulse"
+            className="p-1.5 sm:p-2 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-600 border-2 border-yellow-500 animate-pulse"
             aria-label="Disable Poverty Mode"
             title="💸 Poverty Mode ON - Click to Turn OFF"
           >
-            <span className="text-2xl">⛔</span>
+            <span className="text-lg sm:text-2xl">⛔</span>
           </button>
         )}
         
         <button
           onClick={onGlobalTtsToggle}
-          className={`p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary ${
+          className={`p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary ${
             globalTtsEnabled ? 'bg-blue-100 dark:bg-blue-900/30' : ''
           }`}
           aria-label="Toggle global sound"
           title={globalTtsEnabled ? "Turn sound off globally" : "Turn sound on globally"}
         >
           {globalTtsEnabled ? (
-            <SpeakerOnIcon className="w-6 h-6 text-white" />
+            <SpeakerOnIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           ) : (
-            <SpeakerOffIcon className="w-6 h-6 text-white" />
+            <SpeakerOffIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           )}
         </button>
         <button
           onClick={onThemeToggle}
-          className="p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary"
+          className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Toggle theme"
         >
-          {theme === 'light' ? <MoonIcon className="w-6 h-6 text-white" /> : <SunIcon className="w-6 h-6 text-white" />}
+          {theme === 'light' ? <MoonIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" /> : <SunIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
         </button>
         <button
           onClick={onSettingsClick}
-          className="p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary"
+          className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Open settings"
         >
-          <CogIcon className="w-6 h-6 text-white" />
+          <CogIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
       </div>
     </header>

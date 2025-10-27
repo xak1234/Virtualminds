@@ -314,17 +314,18 @@ export const HiddenIdentitiesGame: React.FC<HiddenIdentitiesGameProps> = ({
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       {/* Header */}
-      <div className="flex justify-between items-center p-5 border-b-2 border-cyan-500/30 bg-slate-900/50 backdrop-blur">
-        <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            The Hidden Identities
+      <div className="flex justify-between items-center p-3 sm:p-5 border-b-2 border-cyan-500/30 bg-slate-900/50 backdrop-blur">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent truncate">
+            <span className="hidden sm:inline">The Hidden Identities</span>
+            <span className="sm:hidden">Hidden Identities</span>
           </h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-gray-400 mt-1 truncate">
             🎭 Theme: {themes.find(t => t.key === gameState.theme)?.name}
           </p>
         </div>
-        <button onClick={onClose} className="text-gray-300 hover:text-white transition-colors">
-          <CloseIcon className="w-6 h-6" />
+        <button onClick={onClose} className="text-gray-300 hover:text-white transition-colors p-1 flex-shrink-0">
+          <CloseIcon className="w-5 h-5 sm:w-6 sm:h-6" />
         </button>
       </div>
 

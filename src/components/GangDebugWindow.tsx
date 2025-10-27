@@ -249,9 +249,12 @@ export const GangDebugWindow: React.FC<GangDebugWindowProps> = ({
         }}
       >
         <div className="w-24"></div>
-        <div className="flex items-center justify-center gap-2 font-mono font-bold flex-1">
-          <span className="text-xl">🔒</span>
-          <span>GANG DEBUG MONITOR</span>
+        <div className="flex items-center justify-center gap-1 sm:gap-2 font-mono font-bold flex-1">
+          <span className="text-lg sm:text-xl">🔒</span>
+          <span className="text-sm sm:text-base">
+            <span className="hidden sm:inline">GANG DEBUG MONITOR</span>
+            <span className="sm:hidden">GANG DEBUG</span>
+          </span>
         </div>
         <div className="flex items-center gap-2">
           <button

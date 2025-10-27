@@ -306,7 +306,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 border-b border-light-border dark:border-base-700">
-          <h2 className="text-2xl font-bold text-light-text dark:text-gray-100 text-center">Virtual Control</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-light-text dark:text-gray-100 text-center">Virtual Control</h2>
           <div className="flex flex-wrap gap-2 mt-4 justify-center">
             <button
               onClick={() => setActiveTab('ai')}
@@ -363,7 +363,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <>
               {/* API Provider Selection */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-light-text dark:text-gray-200">AI Model Settings</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-light-text dark:text-gray-200">AI Model Settings</h3>
             <div>
               <label className="block text-sm font-medium text-light-text-secondary dark:text-gray-400 mb-2">API Provider</label>
               <div className="flex gap-2">
@@ -619,7 +619,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <>
               {/* TTS Settings */}
               <div className="space-y-4">
-                 <h3 className="text-lg font-semibold text-light-text dark:text-gray-200">Text-to-Speech Configuration</h3>
+                 <h3 className="text-base sm:text-lg font-semibold text-light-text dark:text-gray-200">Text-to-Speech Configuration</h3>
                   <div>
                     <label className="block text-sm font-medium text-light-text-secondary dark:text-gray-400 mb-2">TTS Provider</label>
                     <select
@@ -1084,7 +1084,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <>
               {/* UI Colors */}
               <div className="px-6 pb-2 space-y-4">
-                <h3 className="text-lg font-semibold text-light-text dark:text-gray-200">Chat Colors</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-light-text dark:text-gray-200">Chat Colors</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-light-text-secondary dark:text-gray-400 mb-2">Input text color</label>
@@ -1425,7 +1425,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === 'environment' && (
             <>
               <div className="space-y-6">
-                <h2 className="text-2xl font-bold text-light-text dark:text-gray-100">🌍 Environment Settings</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-light-text dark:text-gray-100">🌍 Environment Settings</h2>
                 <p className="text-sm text-light-text-secondary dark:text-gray-400">Configure prison gangs and poverty simulation systems</p>
                 
                 {/* Environment subsection tabs */}
@@ -2542,7 +2542,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === 'about' && (
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-2xl font-bold text-light-text dark:text-gray-100 mb-2">Virtual Minds Framework</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-light-text dark:text-gray-100 mb-2">Virtual Minds Framework</h3>
                 <p className="text-lg font-semibold text-primary mb-4">Version 24</p>
               </div>
 
