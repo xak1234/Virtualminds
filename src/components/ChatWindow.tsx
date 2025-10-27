@@ -420,7 +420,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   e.stopPropagation();
                 }}
                 placeholder="> /clear to clear the window"
-                className="flex-1 bg-light-panel/80 dark:bg-base-800/80 backdrop-blur-sm border border-light-border dark:border-base-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 placeholder:text-green-400 placeholder:text-opacity-70 chat-input-modern"
+                className="flex-1 bg-light-panel/80 dark:bg-base-800/80 backdrop-blur-sm border border-light-border dark:border-base-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 placeholder:text-green-400 placeholder:text-opacity-70 chat-input-modern chat-input-cursor"
                 disabled={isLoading || isConversing || isPersonalityKilled}
                 style={inputTextColor ? { color: inputTextColor } : undefined}
               />

@@ -38,12 +38,27 @@
   }
 }
 
+@keyframes caretBlink {
+  0%, 50% { 
+    caret-color: currentColor;
+  }
+  51%, 100% { 
+    caret-color: transparent;
+  }
+}
+
 .animate-fade-in {
   animation: fadeIn 0.2s ease-out;
 }
 
 .animate-slide-up {
   animation: slideUp 0.3s ease-out;
+}
+
+.chat-input-cursor {
+  caret-color: currentColor;
+  caret-shape: block;
+  animation: caretBlink 1.2s infinite;
 }
 
 /* Terminal-like styles */
@@ -158,6 +173,20 @@
 
 .btn-danger {
   @apply bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors focus-ring;
+}
+
+/* Pressed click effect utility */
+.btn-press {
+  transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
+  will-change: transform, filter;
+}
+
+.btn-press:active,
+.btn-press[aria-pressed="true"],
+.btn-press.is-pressed {
+  transform: translateY(2px) scale(0.96);
+  filter: brightness(0.93);
+  box-shadow: none;
 }
 
 /* Input styles */

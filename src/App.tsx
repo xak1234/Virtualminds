@@ -99,14 +99,13 @@ const App: React.FC = () => {
   const [openaiTtsApiKey, setOpenaiTtsApiKey] = useState('');
   const [geminiTtsApiKey, setGeminiTtsApiKey] = useState('');
   const [azureTtsApiKey, setAzureTtsApiKey] = useState('');
-  const [playhtApiKey, setPlayhtApiKey] = useState('');
-  const [playhtUserId, setPlayhtUserId] = useState('');
   const [defaultEmotion, setDefaultEmotion] = useState<TtsEmotion>('neutral' as TtsEmotion);
   const [emotionIntensity, setEmotionIntensity] = useState<number>(0.7);
   const [exportPath, setExportPath] = useState<string>(DEFAULT_EXPORT_PATH);
 
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [settingsInitialTab, setSettingsInitialTab] = useState<'ai' | 'tts' | 'theme' | 'gangs' | 'experimental'>('ai');
+  const [autoConnectLLM, setAutoConnectLLM] = useState<boolean>(true); // Default to enabled
   const [isDiscoverOpen, setDiscoverOpen] = useState(false);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [isLoading, setIsLoading] = useState<string | null>(null); // windowId that is loading
@@ -538,10 +537,7 @@ const App: React.FC = () => {
     localStorage.removeItem(GEMINI_TTS_API_KEY_STORAGE_KEY);
     setAzureTtsApiKey('');
     localStorage.removeItem('azure-tts-api-key');
-    setPlayhtApiKey('');
-    localStorage.removeItem('playht-api-key');
-    setPlayhtUserId('');
-    localStorage.removeItem('playht-user-id');
+    // PlayHT no longer supported
     setDefaultEmotion('neutral' as TtsEmotion);
     localStorage.removeItem('tts-default-emotion');
     setEmotionIntensity(0.7);
@@ -1338,8 +1334,7 @@ const App: React.FC = () => {
     const savedOpenAiTtsKey = localStorage.getItem(OPENAI_TTS_API_KEY_STORAGE_KEY);
     const savedGeminiTtsKey = localStorage.getItem(GEMINI_TTS_API_KEY_STORAGE_KEY);
     const savedAzureKey = localStorage.getItem('azure-tts-api-key');
-    const savedPlayhtKey = localStorage.getItem('playht-api-key');
-    const savedPlayhtUserId = localStorage.getItem('playht-user-id');
+    // PlayHT no longer supported
     const savedEmotion = localStorage.getItem('tts-default-emotion') as TtsEmotion | null;
     const savedEmotionIntensity = localStorage.getItem('tts-emotion-intensity');
     
@@ -1348,8 +1343,7 @@ const App: React.FC = () => {
     if (savedOpenAiTtsKey) setOpenaiTtsApiKey(savedOpenAiTtsKey);
     if (savedGeminiTtsKey) setGeminiTtsApiKey(savedGeminiTtsKey);
     if (savedAzureKey) setAzureTtsApiKey(savedAzureKey);
-    if (savedPlayhtKey) setPlayhtApiKey(savedPlayhtKey);
-    if (savedPlayhtUserId) setPlayhtUserId(savedPlayhtUserId);
+    // PlayHT no longer supported
     if (savedEmotion) setDefaultEmotion(savedEmotion);
     if (savedEmotionIntensity) setEmotionIntensity(parseFloat(savedEmotionIntensity));
   }, []);
@@ -1614,14 +1608,7 @@ const App: React.FC = () => {
           setAzureTtsApiKey(config.azureApiKey);
           localStorage.setItem('azure-tts-api-key', config.azureApiKey);
       }
-      if(config.playhtApiKey !== undefined) {
-          setPlayhtApiKey(config.playhtApiKey);
-          localStorage.setItem('playht-api-key', config.playhtApiKey);
-      }
-      if(config.playhtUserId !== undefined) {
-          setPlayhtUserId(config.playhtUserId);
-          localStorage.setItem('playht-user-id', config.playhtUserId);
-      }
+      // PlayHT no longer supported
       if(config.defaultEmotion !== undefined) {
           setDefaultEmotion(config.defaultEmotion);
           localStorage.setItem('tts-default-emotion', config.defaultEmotion);
@@ -2880,27 +2867,34 @@ const isGuiSource = source === 'gui' || source === 'converse';
     // Handle chat history and CLI output (skip for converse mode as it's handled separately)
     if (source !== 'converse') {
       addDebugEvent('gen_response', `Generate done ← ${personality.name}`, `Len: ${responseText?.length ?? 0}` + (sanitized !== responseText ? ' (sanitized)' : ''), { preview: (sanitized || '').slice(0, 500) });
-      const newAiMessage: ChatMessage = { 
-        author: MessageAuthor.AI, 
-        text: sanitized, 
-        timestamp: new Date().toISOString(), 
-        authorName,
-        authorAvatar: authorName ? activePersonalities.find(p => p.name === authorName)?.profileImage : undefined
-      };
       
-      // For chess, update chess history instead of regular chat history
-      if (source === 'chess') {
-        setChessHistory(prev => [...prev, newAiMessage]);
-      } else {
-        // FIX: Use the passed-in `historyForApi` to prevent race conditions where the user's message is lost.
-        saveChatHistory(personality.id, [...historyForApi, newAiMessage]);
+      // Don't save error messages to chat history - they should only appear in CLI
+      const isErrorMessage = sanitized.startsWith('Error:');
+      
+      if (!isErrorMessage) {
+        const newAiMessage: ChatMessage = { 
+          author: MessageAuthor.AI, 
+          text: sanitized, 
+          timestamp: new Date().toISOString(), 
+          authorName,
+          authorAvatar: authorName ? activePersonalities.find(p => p.name === authorName)?.profileImage : personality.profileImage
+        };
+        
+        // For chess, update chess history instead of regular chat history
+        if (source === 'chess') {
+          setChessHistory(prev => [...prev, newAiMessage]);
+        } else {
+          // FIX: Use the passed-in `historyForApi` to prevent race conditions where the user's message is lost.
+          saveChatHistory(personality.id, [...historyForApi, newAiMessage]);
+        }
       }
       
+      // Always add to CLI (including error messages)
       if (cliFocusedPersonalityId === personalityId) {
-          setCliHistory(prev => [...prev, {type: CliOutputType.AI_RESPONSE, text: sanitized, authorName: personality.name}]);
+          setCliHistory(prev => [...prev, {type: isErrorMessage ? CliOutputType.ERROR : CliOutputType.AI_RESPONSE, text: sanitized, authorName: personality.name}]);
       } else {
           // Also add to CLI for non-focused personalities
-          addCliMessage(sanitized, CliOutputType.AI_RESPONSE, personality.name);
+          addCliMessage(sanitized, isErrorMessage ? CliOutputType.ERROR : CliOutputType.AI_RESPONSE, personality.name);
       }
     }
 
@@ -2938,8 +2932,7 @@ const isGuiSource = source === 'gui' || source === 'converse';
             openaiApiKey: openaiTtsApiKey,
             geminiApiKey: geminiTtsApiKey,
             azureApiKey: azureTtsApiKey,
-            playhtApiKey: playhtApiKey,
-            playhtUserId: playhtUserId,
+            
             rate: (personality.config.ttsRate ?? 1.0),
             emotion: personality.config.ttsEmotion || defaultEmotion || 'neutral',
             emotionIntensity: personality.config.ttsEmotionIntensity ?? emotionIntensity ?? 0.7,
@@ -3108,8 +3101,7 @@ const isGuiSource = source === 'gui' || source === 'converse';
               openaiApiKey: openaiTtsApiKey,
               geminiApiKey: geminiTtsApiKey,
               azureApiKey: azureTtsApiKey,
-              playhtApiKey: playhtApiKey,
-              playhtUserId: playhtUserId,
+              
               rate: (fromPersonality.config.ttsRate ?? 1.0),
               emotion: fromPersonality.config.ttsEmotion || defaultEmotion || 'neutral',
               emotionIntensity: fromPersonality.config.ttsEmotionIntensity ?? emotionIntensity ?? 0.7,
@@ -3744,8 +3736,9 @@ const isGuiSource = source === 'gui' || source === 'converse';
     // Removed duplicate poverty log here; responses are logged when generated
 
     for (let i = 0; i < maxTurns * 2; i++) {
-        // Check if conversation was interrupted
-        if (conversingPersonalityIds.length === 0) {
+        // Avoid breaking on the very first iteration due to async state update timing.
+        // Only treat it as stopped if a subsequent iteration finds no active conversation.
+        if (i > 0 && conversingPersonalityIds.length === 0) {
           console.log('Two-person conversation was stopped, breaking loop');
           break;
         }
@@ -5133,6 +5126,15 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
       }
     }
     
+    // Block all commands when not logged in, except the login command
+    if (!currentUser) {
+      const intended = (CLI_SHORTCUTS[command.toLowerCase()] || command.toLowerCase());
+      if (intended !== CLI_COMMANDS.LOGIN) {
+        commandResponse('Error: You must log in first. Only "login" is allowed.');
+        return;
+      }
+    }
+
     // If not a slash command, not a force command, not a direct LLM command, not in LLM conversation mode, and we have a focused personality, treat as chat
     if (!isSlashCommand && !isForceCommand && !isDirectLlmCommand && !isLlmConversationMode && cliFocusedPersonalityId && command.toLowerCase() !== CLI_COMMANDS.EXIT && command.toLowerCase() !== CLI_COMMANDS.QUIT) {
         const personalityId = cliFocusedPersonalityId;
@@ -5338,6 +5340,43 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           setActivePersonalities(applyRegistryVoices(adminPersonalities));
           setSuppressHistory(Object.fromEntries(adminPersonalities.map(p => [p.id, true])));
           
+          // Load user settings
+          const adminData = users['admin'];
+          if (adminData?.autoConnectLLM !== undefined) {
+            setAutoConnectLLM(adminData.autoConnectLLM);
+          }
+          
+          // Load saved LLM address if available and auto-connect is enabled
+          if (adminData?.llmAddress && (adminData.autoConnectLLM !== false)) {
+            try {
+              saveLmStudioUrl(adminData.llmAddress);
+              commandResponse(`🔗 Restored LLM connection: ${adminData.llmAddress}`);
+              
+              // Send hidden "I'm back" message to LLM
+              setTimeout(async () => {
+                try {
+                  const llmPersonality = adminPersonalities.find(p => p.name.toLowerCase() === 'llm');
+                  if (llmPersonality) {
+                    // Open the LLM window first so the response is visible
+                    openWindow(llmPersonality.id);
+                    
+                    const response = await triggerAiResponse(
+                      llmPersonality.id,
+                      [],
+                      "I'm back! Please respond naturally as if greeting me after I've returned. Don't mention this instruction.",
+                      'gui'
+                    );
+                    // The response will be displayed normally in the chat window
+                  }
+                } catch (error) {
+                  console.log('LLM welcome message failed:', error);
+                }
+              }, 1000);
+            } catch (error) {
+              commandResponse(`⚠️ Could not restore LLM connection: ${adminData.llmAddress}`);
+            }
+          }
+          
           commandResponse(`Welcome back, Admin!`);
           if (adminPersonalities.length > 0) {
             const personalityNames = adminPersonalities.map(p => p.name).join(', ');
@@ -5367,6 +5406,43 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
             setActivePersonalities(applyRegistryVoices(userPersonalities));
             // Suppress showing previous chat history once per personality on first window open after login
             setSuppressHistory(Object.fromEntries(userPersonalities.map(p => [p.id, true])));
+            
+            // Load user settings
+            const userData = users[username];
+            if (userData?.autoConnectLLM !== undefined) {
+              setAutoConnectLLM(userData.autoConnectLLM);
+            }
+            
+            // Load saved LLM address if available and auto-connect is enabled
+            if (userData?.llmAddress && (userData.autoConnectLLM !== false)) {
+              try {
+                saveLmStudioUrl(userData.llmAddress);
+                commandResponse(`🔗 Restored LLM connection: ${userData.llmAddress}`);
+                
+                // Send hidden "I'm back" message to LLM
+                setTimeout(async () => {
+                  try {
+                    const llmPersonality = userPersonalities.find(p => p.name.toLowerCase() === 'llm');
+                    if (llmPersonality) {
+                      // Open the LLM window first so the response is visible
+                      openWindow(llmPersonality.id);
+                      
+                      const response = await triggerAiResponse(
+                        llmPersonality.id,
+                        [],
+                        "I'm back! Please respond naturally as if greeting me after I've returned. Don't mention this instruction.",
+                        'gui'
+                      );
+                      // The response will be displayed normally in the chat window
+                    }
+                  } catch (error) {
+                    console.log('LLM welcome message failed:', error);
+                  }
+                }, 1000);
+              } catch (error) {
+                commandResponse(`⚠️ Could not restore LLM connection: ${userData.llmAddress}`);
+              }
+            }
             
             commandResponse(`Welcome back, ${username}!`);
             if (userPersonalities.length > 0) {
@@ -5579,6 +5655,22 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           
           // Connection successful, save the URL
           saveLmStudioUrl(urlArg);
+          
+          // Save to user profile if logged in
+          if (currentUser) {
+            const updatedUsers = { ...users };
+            if (updatedUsers[currentUser]) {
+              updatedUsers[currentUser].llmAddress = urlArg;
+              // If autoConnectLLM is not set, default to enabled when they first set an LLM address
+              if (updatedUsers[currentUser].autoConnectLLM === undefined) {
+                updatedUsers[currentUser].autoConnectLLM = true;
+                setAutoConnectLLM(true);
+              }
+              setUsers(updatedUsers);
+              userService.saveUsers(updatedUsers);
+            }
+          }
+          
           const newUrl = getCurrentBaseUrl();
           commandResponse(`✅ LM Studio URL updated to: ${urlArg}`);
           commandResponse(`   Active URL: ${newUrl}`);
@@ -5905,7 +5997,14 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           }
           
           if (missingLinks.length > 0) {
-            commandResponse('Note: Not all personalities are explicitly linked. Proceeding with implicit visibility among all loaded personalities.');
+            commandResponse('Note: Not all personalities are explicitly linked. Auto-linking all active personalities for this conversation.');
+          }
+
+          // Ensure mutual visibility for all active personalities before starting
+          for (let i = 0; i < activePersonalities.length; i++) {
+            for (let j = i + 1; j < activePersonalities.length; j++) {
+              createBidirectionalLink(activePersonalities[i].id, activePersonalities[j].id);
+            }
           }
           
           const cliTopic = args.slice(1).join(' ').trim() || 'General discussion';
@@ -5968,7 +6067,12 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           break; // Error already reported above
         }
 
-        // Implicitly allow all selected personalities to see each other for this conversation
+        // Ensure all selected personalities can see each other for this conversation
+        for (let i = 0; i < personalities.length; i++) {
+          for (let j = i + 1; j < personalities.length; j++) {
+            createBidirectionalLink(personalities[i].id, personalities[j].id);
+          }
+        }
 
         if (personalities.length === 2) {
           // Two-person conversation
@@ -8537,8 +8641,7 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           openaiApiKey: openaiTtsApiKey, 
           geminiApiKey: geminiTtsApiKey,
           azureApiKey: azureTtsApiKey,
-          playhtApiKey: playhtApiKey,
-          playhtUserId: playhtUserId,
+          
           defaultEmotion: defaultEmotion,
           emotionIntensity: emotionIntensity
         }}
@@ -8582,6 +8685,19 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
         personalities={activePersonalities}
         experimentalSettings={experimentalSettings}
         onExperimentalSettingsChange={setExperimentalSettings}
+        autoConnectLLM={autoConnectLLM}
+        onAutoConnectLLMChange={(enabled) => {
+          setAutoConnectLLM(enabled);
+          // Save to user profile if logged in
+          if (currentUser) {
+            const updatedUsers = { ...users };
+            if (updatedUsers[currentUser]) {
+              updatedUsers[currentUser].autoConnectLLM = enabled;
+              setUsers(updatedUsers);
+              userService.saveUsers(updatedUsers);
+            }
+          }
+        }}
         onResetThemeColors={() => {
           // Reset chat colors
           setChatInputColor('');

@@ -75,6 +75,9 @@ interface SettingsModalProps {
   onExperimentalSettingsChange: (settings: ExperimentalSettings) => void;
   // Initial tab to open
   initialTab?: 'ai' | 'tts' | 'theme' | 'environment' | 'experimental' | 'about';
+  // Auto-connect LLM setting
+  autoConnectLLM?: boolean;
+  onAutoConnectLLMChange?: (enabled: boolean) => void;
 }
 
 
@@ -109,7 +112,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     personalities,
     experimentalSettings,
     onExperimentalSettingsChange,
-    initialTab = 'ai'
+    initialTab = 'ai',
+    autoConnectLLM,
+    onAutoConnectLLMChange
 }) => {
   // Global model parameters are configured per personality; suppress unused props
   void modelConfig; void onModelConfigChange;
@@ -305,7 +310,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <div className="flex flex-wrap gap-2 mt-4 justify-center">
             <button
               onClick={() => setActiveTab('ai')}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap btn-press ${
                 activeTab === 'ai' ? 'bg-primary text-white' : 'bg-light-border dark:bg-base-700 hover:bg-black/10 dark:hover:bg-base-600 text-light-text dark:text-gray-200'
               }`}
             >
@@ -313,7 +318,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('tts')}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap btn-press ${
                 activeTab === 'tts' ? 'bg-primary text-white' : 'bg-light-border dark:bg-base-700 hover:bg-black/10 dark:hover:bg-base-600 text-light-text dark:text-gray-200'
               }`}
             >
@@ -321,7 +326,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('theme')}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap btn-press ${
                 activeTab === 'theme' ? 'bg-primary text-white' : 'bg-light-border dark:bg-base-700 hover:bg-black/10 dark:hover:bg-base-600 text-light-text dark:text-gray-200'
               }`}
             >
@@ -329,7 +334,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('environment')}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap btn-press ${
                 activeTab === 'environment' ? 'bg-primary text-white' : 'bg-light-border dark:bg-base-700 hover:bg-black/10 dark:hover:bg-base-600 text-light-text dark:text-gray-200'
               }`}
             >
@@ -337,7 +342,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('experimental')}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap btn-press ${
                 activeTab === 'experimental' ? 'bg-primary text-white' : 'bg-light-border dark:bg-base-700 hover:bg-black/10 dark:hover:bg-base-600 text-light-text dark:text-gray-200'
               }`}
             >
@@ -345,7 +350,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </button>
             <button
               onClick={() => setActiveTab('about')}
-              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap btn-press ${
                 activeTab === 'about' ? 'bg-primary text-white' : 'bg-light-border dark:bg-base-700 hover:bg-black/10 dark:hover:bg-base-600 text-light-text dark:text-gray-200'
               }`}
             >
@@ -366,7 +371,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <button
                     key={provider}
                     onClick={() => onApiProviderChange(provider)}
-                    className={`flex-1 capitalize p-2 rounded-md text-sm font-semibold transition-colors ${
+                    className={`flex-1 capitalize p-2 rounded-md text-sm font-semibold transition-colors btn-press ${
                       apiProvider === provider ? 'bg-primary text-white' : 'bg-light-border dark:bg-base-700 hover:bg-black/10 dark:hover:bg-base-600'
                     }`}
                   >
@@ -583,6 +588,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </p>
                 </div>
               </div>
+
+              {/* Auto-connect LLM Setting */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-light-text dark:text-gray-200">Local LLM Settings</h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-light-text dark:text-gray-200 mb-1">
+                      Auto-connect Local LLM
+                    </label>
+                    <p className="text-xs text-light-text-secondary dark:text-gray-400">
+                      Automatically restore your saved LLM connection
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer ml-4">
+                    <input
+                      type="checkbox"
+                      checked={autoConnectLLM || false}
+                      onChange={(e) => onAutoConnectLLMChange?.(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                  </label>
+                </div>
+              </div>
             </>
           )}
 
@@ -604,13 +633,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <option value={TtsProvider.BROWSER}>Browser (Basic)</option>
                       <option value={TtsProvider.ELEVENLABS}>ElevenLabs (High Quality + Emotions)</option>
                       <option value={TtsProvider.AZURE}>Azure (Premium + Full Emotions)</option>
-                      <option value={TtsProvider.PLAYHT}>PlayHT (Ultra-Realistic + Emotions)</option>
                       <option value={TtsProvider.OPENAI}>OpenAI (High Quality)</option>
                       <option value={TtsProvider.GEMINI}>Gemini (Google Cloud TTS)</option>
                       <option value={TtsProvider.SELF_HOSTED}>Self-Hosted (Voice Cloning - FREE!)</option>
                     </select>
                     <p className="text-xs text-gray-500 mt-2">
-                      💡 <strong>Recommended for Emotions:</strong> Azure or PlayHT offer the most advanced emotion control.
+                      💡 <strong>Recommended for Emotions:</strong> Azure offers the most advanced emotion control.
                       <strong>For Cost Savings:</strong> Self-Hosted offers voice cloning at near-zero cost!
                     </p>
                   </div>
@@ -627,18 +655,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     />
                   )}
 
-                  {/* Central Voice ID Registry - Show for ElevenLabs, PlayHT, and Azure */}
-                  {(ttsConfig?.provider === TtsProvider.ELEVENLABS || 
-                    ttsConfig?.provider === TtsProvider.PLAYHT ||
+                  {/* Central Voice ID Registry - Show for ElevenLabs and Azure */}
+                  {(ttsConfig?.provider === TtsProvider.ELEVENLABS ||
                     ttsConfig?.provider === TtsProvider.AZURE) && (
                       <div className="mt-6 p-3 rounded-md border border-light-border dark:border-base-600 bg-white/60 dark:bg-base-800/60">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="text-md font-semibold text-light-text dark:text-gray-200">
-                            Voice IDs (Central Registry) - {
-                              ttsConfig?.provider === TtsProvider.ELEVENLABS ? 'ElevenLabs' :
-                              ttsConfig?.provider === TtsProvider.PLAYHT ? 'PlayHT' :
-                              ttsConfig?.provider === TtsProvider.AZURE ? 'Azure' : 'Provider'
-                            }
+                            Voice IDs (Central Registry) - {ttsConfig?.provider === TtsProvider.ELEVENLABS ? 'ElevenLabs' : ttsConfig?.provider === TtsProvider.AZURE ? 'Azure' : 'Provider'}
                           </h4>
                           <div className="flex gap-2">
                             {ttsConfig?.provider === TtsProvider.ELEVENLABS && (
@@ -690,22 +713,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             >Import</button>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-500 mb-2">
-                          {ttsConfig?.provider === TtsProvider.ELEVENLABS && 'Assign ElevenLabs voice IDs per personality here.'}
-                          {ttsConfig?.provider === TtsProvider.PLAYHT && 'Assign PlayHT voice IDs (s3://... format or simple names) per personality here.'}
-                          {ttsConfig?.provider === TtsProvider.AZURE && 'Assign Azure Neural voice names (e.g., en-US-AriaNeural) per personality here.'}
-                          {' '}This registry overrides any per-personality voice ID fields.
-                        </p>
+                        <p className="text-xs text-gray-500 mb-2">{ttsConfig?.provider === TtsProvider.ELEVENLABS && 'Assign ElevenLabs voice IDs per personality here.'}{ttsConfig?.provider === TtsProvider.AZURE && 'Assign Azure Neural voice names (e.g., en-US-AriaNeural) per personality here.'} {' '}This registry overrides any per-personality voice ID fields.</p>
                         <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                           {personalities.length === 0 ? (
                             <p className="text-xs text-gray-500">No personalities loaded.</p>
                           ) : personalities.map(p => {
                             const current = voiceMap[p.id] || '';
                             // Provider-specific placeholders
-                            const placeholder = 
-                              ttsConfig?.provider === TtsProvider.ELEVENLABS ? 'Voice ID (21m00Tcm4TlvDq8ikWAM)' :
-                              ttsConfig?.provider === TtsProvider.PLAYHT ? 's3://voice-cloning-zero-shot/.../manifest.json' :
-                              ttsConfig?.provider === TtsProvider.AZURE ? 'en-US-AriaNeural' : 'Voice ID';
+                              const placeholder = ttsConfig?.provider === TtsProvider.ELEVENLABS ? 'Voice ID (21m00Tcm4TlvDq8ikWAM)' : ttsConfig?.provider === TtsProvider.AZURE ? 'en-US-AriaNeural' : 'Voice ID';
                             
                             return (
                               <div key={p.id} className="flex items-center gap-2">
@@ -751,21 +766,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           })}
                         </div>
                         
-                        {/* Provider-specific help */}
-                        {ttsConfig?.provider === TtsProvider.PLAYHT && (
-                          <div className="mt-3 p-2 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded text-xs">
-                            <p className="font-semibold text-purple-800 dark:text-purple-200 mb-1">PlayHT Voice ID Format:</p>
-                            <code className="text-[10px] bg-black/10 dark:bg-white/10 px-1 rounded">
-                              s3://voice-cloning-zero-shot/[id]/[name]/manifest.json
-                            </code>
-                            <p className="mt-2 text-purple-700 dark:text-purple-300">
-                              Find your cloned voice IDs at: <a href="https://play.ht/studio/voices" target="_blank" className="underline">play.ht/studio/voices</a>
-                            </p>
-                            <p className="mt-1 text-purple-700 dark:text-purple-300">
-                              Or use stock voices: <code className="bg-black/10 px-1">jennifer</code>, <code className="bg-black/10 px-1">larry</code>, <code className="bg-black/10 px-1">melissa</code>
-                            </p>
-                          </div>
-                        )}
+                        {/* Provider-specific help (PlayHT removed) */}
                         
                         {ttsConfig?.provider === TtsProvider.AZURE && (
                           <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-xs">
@@ -831,55 +832,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                   )}
 
-                  {ttsConfig?.provider === TtsProvider.PLAYHT && (
-                    <div className="space-y-3">
-                      <div className="p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-md">
-                        <p className="text-xs text-purple-800 dark:text-purple-200 font-semibold mb-2">
-                          📚 Setup Guide:
-                        </p>
-                        <ol className="text-xs text-purple-700 dark:text-purple-300 space-y-1 ml-4 list-decimal">
-                          <li>Get credentials at: <a href="https://play.ht/studio/api-access" target="_blank" className="underline">play.ht/studio/api-access</a></li>
-                          <li>Find cloned voices at: <a href="https://play.ht/studio/voices" target="_blank" className="underline">play.ht/studio/voices</a></li>
-                          <li>Copy the voice ID (s3://... format)</li>
-                          <li>Paste below and in Voice Registry</li>
-                        </ol>
-                      </div>
-                      
-                      <div>
-                        <label htmlFor="playht-key" className="block text-sm font-medium text-light-text-secondary dark:text-gray-400 mb-2">
-                          PlayHT API Key (Secret Key)
-                        </label>
-                        <input
-                          id="playht-key"
-                          type="password"
-                          value={ttsConfig?.playhtApiKey || ''}
-                          onChange={(e) => onTtsConfigChange({ playhtApiKey: e.target.value })}
-                          placeholder="Enter your PlayHT Secret Key from API Access page"
-                          className="w-full bg-light-bg dark:bg-base-700 border border-light-border dark:border-base-600 rounded-md px-3 py-2 text-light-text dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="playht-user" className="block text-sm font-medium text-light-text-secondary dark:text-gray-400 mb-2">
-                          PlayHT User ID
-                        </label>
-                        <input
-                          id="playht-user"
-                          type="text"
-                          value={ttsConfig?.playhtUserId || ''}
-                          onChange={(e) => onTtsConfigChange({ playhtUserId: e.target.value })}
-                          placeholder="Enter your PlayHT User ID from API Access page"
-                          className="w-full bg-light-bg dark:bg-base-700 border border-light-border dark:border-base-600 rounded-md px-3 py-2 text-light-text dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        Both API Key and User ID are required. Get them from the API Access page.
-                      </p>
-                      <p className="text-xs text-purple-600 dark:text-purple-400">
-                        <strong>🎭 PlayHT Benefits:</strong> Ultra-realistic voices with PlayDialog engine (fastest).
-                        Emotion conveyed through dynamic temperature and speed modulation. Supports instant voice cloning.
-                      </p>
-                    </div>
-                  )}
+                  {/* PlayHT provider removed */}
 
                   {ttsConfig?.provider === TtsProvider.SELF_HOSTED && (
                     <div className="space-y-3">

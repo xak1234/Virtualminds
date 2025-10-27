@@ -211,8 +211,12 @@ export const DraggableWindow: React.FC<DraggableWindowProps> = ({
 
   const handleResizeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
+    e.preventDefault();
     onFocus();
     setIsResizing(true);
+    // Disable text selection on the document during resize
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
   };
   
   const handleNameSave = () => {
@@ -279,7 +283,10 @@ export const DraggableWindow: React.FC<DraggableWindowProps> = ({
               ? `rgba(31, 41, 55, ${Math.min(Math.max(chatWindowAlpha, 0), 1)})`
               : `rgba(255, 255, 255, ${Math.min(Math.max(chatWindowAlpha, 0), 1)})`),
       }}
-      onClick={onFocus}
+      onClick={(e) => {
+        e.stopPropagation();
+        onFocus();
+      }}
     >
       <header
         className={`h-10 flex items-center justify-between px-2 rounded-t-lg cursor-grab ${isDragging ? 'cursor-grabbing' : ''} relative`}

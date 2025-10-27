@@ -3,7 +3,6 @@ import * as elevenlabsService from './elevenlabsService';
 import * as openaiTtsService from './openaiTtsService';
 import * as geminiTtsService from './geminiTtsService';
 import * as azureTtsService from './azureTtsService';
-import * as playhtTtsService from './playhtTtsService';
 import * as selfHostedTtsService from './selfHostedTtsService';
 import { filterForSpeech } from './textFilterService';
 import { voiceIdRegistry } from './voiceIdRegistryService';
@@ -386,8 +385,6 @@ interface SpeakConfig {
     openaiApiKey?: string;
     geminiApiKey?: string;
     azureApiKey?: string;
-    playhtApiKey?: string;
-    playhtUserId?: string;
     rate?: number; // Playback rate for Browser TTS only (0.5 - 2.0)
     // Emotion controls
     emotion?: TtsEmotion;
@@ -416,6 +413,7 @@ interface PendingSpeechRequest {
   config: SpeakConfig;
   onError?: (message: string) => void;
   options?: SpeakOptions;
+  startTime?: number; // Timestamp when this request started processing
 }
 
 const speechQueue: PendingSpeechRequest[] = [];
@@ -437,6 +435,8 @@ const processNextSpeech = async (): Promise<void> => {
     currentlyPlayingRequest = null;
     return;
   }
+  // Set the start time when we begin processing this request
+  next.startTime = Date.now();
   currentlyPlayingRequest = next;
   await playSpeechRequest(next);
 };
@@ -1033,39 +1033,6 @@ case TtsProvider.ELEVENLABS:
                 }
                 break;
 
-            case TtsProvider.PLAYHT:
-                {
-                    try {
-                        if (!config.playhtApiKey || !config.playhtUserId) {
-                            throw new Error('PlayHT API Key and User ID not configured. Go to Settings → Text to Speech → PlayHT fields.');
-                        }
-                        console.log(`[TTS] Using PlayHT with emotion: ${config.emotion || 'neutral'}`);
-                        const audioBlob = await playhtTtsService.generateSpeech(
-                          config.playhtApiKey || null,
-                          config.playhtUserId || null,
-                          filteredText,
-                          {
-                            voice: config.voiceId,
-                            emotion: config.emotion,
-                            emotionIntensity: config.emotionIntensity,
-                            speed: config.rate,
-                          }
-                        );
-                        await playAudioBlob(audioBlob, provider, options, onError);
-                        return;
-                    } catch (error) {
-                        console.warn("PlayHT TTS error:", error);
-                        const errorMessage = error instanceof Error ? error.message : String(error);
-                        // Only show error if PlayHT was originally requested
-                        if (originalProvider === TtsProvider.PLAYHT) {
-                          onError?.(errorMessage);
-                        }
-                        finalizeSpeech(provider, options?.speakerId);
-                        // Fallback to browser TTS
-                        console.log('[TTS] Falling back to Browser TTS');
-                    }
-                }
-                break;
 
             case TtsProvider.GEMINI:
                 {
@@ -1345,7 +1312,6 @@ const selectOptimalProvider = (
   // - Self-Hosted: User wants to use their own TTS server
   // - OpenAI TTS: User configured OpenAI specifically  
   // - Gemini TTS: User configured Gemini specifically
-  // - PlayHT: User configured PlayHT specifically
   // - Azure: User configured Azure specifically
   // - Browser: User wants browser TTS
   if (requestedProvider !== TtsProvider.ELEVENLABS) {
@@ -1396,6 +1362,15 @@ export const speak = async (
     return;
   }
   
+  // DEBUG: Log all TTS requests to help track conversation restart issues
+  console.log(`[TTS DEBUG] New speak request from ${options?.speakerId || 'unknown'}:`, {
+    textPreview: text.substring(0, 50) + '...',
+    provider,
+    currentlySpeaking: currentlyPlayingRequest?.options?.speakerId,
+    queueLength: speechQueue.length,
+    timestamp: new Date().toISOString()
+  });
+  
   // SMART ROUTING: Use ElevenLabs only for VIP personalities
   const hasVoiceId = !!(config.voiceId || (options?.speakerId && voiceIdRegistry.getVoiceId(options.speakerId)));
   const optimalProvider = selectOptimalProvider(provider, options?.personality?.name, hasVoiceId);
@@ -1405,8 +1380,8 @@ export const speak = async (
     provider = optimalProvider;
   }
 
-  // CRITICAL: During conversations, if the same speaker is currently speaking or has queued items,
-  // interrupt and replace with the new message to prevent sentence restarts
+  // INTELLIGENT INTERRUPTION: Only interrupt if the new message is significantly different
+  // and enough time has passed to avoid conversation restart loops
   const speakerId = options?.speakerId;
   
   if (speakerId) {
@@ -1417,29 +1392,72 @@ export const speak = async (
     const hasQueuedItems = speechQueue.some(item => item.options?.speakerId === speakerId);
     
     if (isCurrentlySpeaking || hasQueuedItems) {
-      console.log(`[TTS] Speaker ${speakerId} is already speaking or queued. Interrupting to prevent restart.`, {
-        currentlySpeaking: isCurrentlySpeaking,
-        queuedCount: speechQueue.filter(item => item.options?.speakerId === speakerId).length,
-        newText: text.substring(0, 50) + '...'
-      });
+      // Get the current/queued text for comparison
+      const currentText = currentlyPlayingRequest?.text || '';
+      const queuedTexts = speechQueue
+        .filter(item => item.options?.speakerId === speakerId)
+        .map(item => item.text);
       
-      // Remove all queued items from this speaker
-      const filteredQueue = speechQueue.filter(item => item.options?.speakerId !== speakerId);
-      const removedCount = speechQueue.length - filteredQueue.length;
-      speechQueue.length = 0;
-      speechQueue.push(...filteredQueue);
+      // Check if the new text is significantly different (not just a continuation or restart)
+      const normalizedNewText = text.trim().toLowerCase();
+      const normalizedCurrentText = currentText.trim().toLowerCase();
       
-      if (removedCount > 0) {
-        console.log(`[TTS] Removed ${removedCount} queued item(s) from speaker ${speakerId}`);
-      }
+      // Calculate text similarity (simple approach)
+      const isSignificantlyDifferent = 
+        normalizedNewText.length > 10 && // Must be substantial text
+        !normalizedCurrentText.includes(normalizedNewText.substring(0, 20)) && // Not a prefix of current
+        !normalizedNewText.includes(normalizedCurrentText.substring(0, 20)) && // Current not a prefix of new
+        !queuedTexts.some(queuedText => {
+          const normalizedQueued = queuedText.trim().toLowerCase();
+          return normalizedQueued.includes(normalizedNewText.substring(0, 20)) ||
+                 normalizedNewText.includes(normalizedQueued.substring(0, 20));
+        });
       
-      // If currently speaking, cancel immediately (this will trigger the next speech)
-      if (isCurrentlySpeaking && isSpeaking) {
-        console.log(`[TTS] Canceling current speech from ${speakerId} to play new message`);
-        await cancelCurrentAudio(false); // Don't fade out - interrupt immediately
+      // Check if enough time has passed since the current speech started (minimum 2 seconds for ElevenLabs)
+      const currentSpeechStartTime = currentlyPlayingRequest?.startTime || 0;
+      const timeSinceStart = Date.now() - currentSpeechStartTime;
+      const minSpeakingTime = provider === TtsProvider.ELEVENLABS ? 2000 : 1000; // Longer grace period for ElevenLabs
+      
+      const shouldInterrupt = isSignificantlyDifferent && timeSinceStart > minSpeakingTime;
+      
+      if (shouldInterrupt) {
+        console.log(`[TTS] Speaker ${speakerId} interruption approved - significantly different content after ${timeSinceStart}ms`, {
+          currentlySpeaking: isCurrentlySpeaking,
+          queuedCount: speechQueue.filter(item => item.options?.speakerId === speakerId).length,
+          newText: text.substring(0, 50) + '...',
+          currentText: currentText.substring(0, 50) + '...',
+          timeSinceStart
+        });
         
-        // Add a small delay after cancellation to prevent audio overlap
-        await new Promise(resolve => setTimeout(resolve, 150));
+        // Remove all queued items from this speaker
+        const filteredQueue = speechQueue.filter(item => item.options?.speakerId !== speakerId);
+        const removedCount = speechQueue.length - filteredQueue.length;
+        speechQueue.length = 0;
+        speechQueue.push(...filteredQueue);
+        
+        if (removedCount > 0) {
+          console.log(`[TTS] Removed ${removedCount} queued item(s) from speaker ${speakerId}`);
+        }
+        
+        // If currently speaking, cancel immediately (this will trigger the next speech)
+        if (isCurrentlySpeaking && isSpeaking) {
+          console.log(`[TTS] Canceling current speech from ${speakerId} to play new message`);
+          await cancelCurrentAudio(false); // Don't fade out - interrupt immediately
+          
+          // Add a small delay after cancellation to prevent audio overlap
+          await new Promise(resolve => setTimeout(resolve, 150));
+        }
+      } else {
+        console.log(`[TTS] Speaker ${speakerId} interruption blocked - preventing conversation restart`, {
+          isSignificantlyDifferent,
+          timeSinceStart,
+          minSpeakingTime,
+          newText: text.substring(0, 30) + '...',
+          currentText: currentText.substring(0, 30) + '...'
+        });
+        
+        // Don't add to queue if it's likely a restart - just ignore this request
+        return;
       }
     }
   }

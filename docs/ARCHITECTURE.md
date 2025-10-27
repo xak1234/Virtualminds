@@ -68,7 +68,7 @@ services/
 │   ├── openaiTtsService.ts       # OpenAI TTS API
 │   ├── geminiTtsService.ts       # Google Cloud TTS
 │   ├── azureTtsService.ts        # Azure Cognitive Services
-│   ├── playhtTtsService.ts       # Play.ht API
+│   ├── (removed) playhtTtsService.ts       # Play.ht API (removed)
 │   └── selfHostedTtsService.ts   # Coqui XTTS server
 │
 ├── Core Features

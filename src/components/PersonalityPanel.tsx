@@ -356,7 +356,7 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
                   onPersonalitySelect(p.id);
                 }
               }}
-              className="flex items-center gap-4 flex-1 min-w-0"
+              className="flex items-center gap-4 flex-1 min-w-0 btn-press"
               title={
                 isKilled || memberStatus?.killed
                   ? "KILLED - Cannot converse or interact"
@@ -523,7 +523,7 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
             </button>
             <button
               onClick={(e) => handleRemoveClick(e, p.id)}
-              className={`${isKilled ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200 p-1 hover:bg-red-500/20 rounded-md flex-shrink-0`}
+              className={`${isKilled ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200 p-1 hover:bg-red-500/20 rounded-md flex-shrink-0 btn-press`}
               title={isKilled ? 'Being removed...' : `Remove ${p.name}`}
               disabled={isKilled}
             >
@@ -582,9 +582,9 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
         </div>
         
         {/* Discover Button */}
-        <button
+          <button
           onClick={onCreateClick}
-          className="w-full bg-gradient-to-r from-primary to-primary/80 dark:from-accent dark:to-accent/80 hover:from-primary/90 hover:to-primary/70 dark:hover:from-accent/90 dark:hover:to-accent/70 text-white dark:text-base-900 font-semibold py-2 px-3 rounded-md flex items-center justify-center gap-1.5 transition-colors duration-200 shadow-md hover:shadow-lg text-sm relative z-50"
+          className="w-full bg-gradient-to-r from-primary to-primary/80 dark:from-accent dark:to-accent/80 hover:from-primary/90 hover:to-primary/70 dark:hover:from-accent/90 dark:hover:to-accent/70 text-white dark:text-base-900 font-semibold py-2 px-3 rounded-md flex items-center justify-center gap-1.5 transition-colors duration-200 shadow-md hover:shadow-lg text-sm relative z-50 btn-press"
           title="Discover and create new personalities"
           style={{ pointerEvents: 'auto' }}
         >

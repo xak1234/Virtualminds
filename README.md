@@ -83,7 +83,7 @@ A cutting-edge framework for creating, managing, and simulating complex AI perso
 
 - **Node.js** v18 or higher
 - **API Key** for at least one AI provider (Google Gemini, OpenAI, or Claude) - **REQUIRED for AI responses**
-- **TTS API Key** (Optional) - Only needed if using cloud TTS providers (ElevenLabs, Azure, PlayHT, OpenAI TTS, Google Cloud TTS)
+- **TTS API Key** (Optional) - Only needed if using cloud TTS providers (ElevenLabs, Azure, OpenAI TTS, Google Cloud TTS)
 - **No API Keys Needed** for: Browser TTS, Self-hosted TTS, Local AI models
 
 ### Installation
@@ -539,7 +539,7 @@ Comprehensive context injected into personality prompts:
 - **Coqui XTTS-v2** - Self-hosted voice cloning (FREE!)
 - **ElevenLabs** - Premium cloud TTS with emotions (requires API key)
 - **Azure Neural Voices** - Professional TTS with full emotion support (requires API key)
-- **PlayHT** - Ultra-realistic voices with advanced emotions (requires API key)
+  
 - **OpenAI TTS** - High-quality cloud TTS (requires API key)
 - **Google Cloud TTS** - Neural2 voices with premium quality (requires API key)
 - **Browser TTS** - Native browser voices (basic, no API key needed)
@@ -690,7 +690,7 @@ Advanced voice system with multiple providers and smart routing:
 **Premium TTS Providers**
 - **ElevenLabs**: Premium voices with emotion support
 - **Azure Neural**: Professional voices with full emotion control
-- **PlayHT**: Ultra-realistic voices with advanced emotions
+  
 - **Google Neural2**: Highest quality voices with premium prosody
 - **OpenAI TTS**: High-quality cloud synthesis
 
@@ -757,7 +757,7 @@ Add TTS provider keys if using cloud TTS:
 {
   "elevenlabsApiKey": "your-elevenlabs-key",  // For ElevenLabs TTS
   "azureApiKey": "your-azure-key",            // For Azure TTS
-  "playhtApiKey": "your-playht-key"           // For PlayHT TTS
+  
 }
 ```
 

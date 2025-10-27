@@ -11,7 +11,6 @@ export enum TtsProvider {
   OPENAI = 'openai',
   GEMINI = 'gemini',
   AZURE = 'azure',
-  PLAYHT = 'playht',
   SELF_HOSTED = 'self_hosted',
 }
 
@@ -32,8 +31,6 @@ export interface TtsConfig {
   openaiApiKey: string;
   geminiApiKey?: string;
   azureApiKey?: string;
-  playhtApiKey?: string;
-  playhtUserId?: string;
   selfHostedUrl?: string; // URL to self-hosted TTS API
   defaultEmotion?: TtsEmotion;
   emotionIntensity?: number; // 0.0 to 1.0
@@ -124,6 +121,8 @@ export interface UserData {
   loadedPersonalities?: string[]; // Array of personality IDs that were loaded for this user
   lastLogin?: string; // Timestamp of last login
   profilePicture?: string; // URL or base64 encoded image for user avatar
+  llmAddress?: string; // Saved LLM server address (e.g., "127.0.0.1:1234")
+  autoConnectLLM?: boolean; // Whether to auto-connect to saved LLM address on login
 }
 
 export enum WindowStatus {
