@@ -74,7 +74,7 @@ interface SettingsModalProps {
   experimentalSettings: ExperimentalSettings;
   onExperimentalSettingsChange: (settings: ExperimentalSettings) => void;
   // Initial tab to open
-  initialTab?: 'ai' | 'tts' | 'theme' | 'environment' | 'experimental';
+  initialTab?: 'ai' | 'tts' | 'theme' | 'environment' | 'experimental' | 'about';
 }
 
 
@@ -210,7 +210,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     };
   }, []);
 
-  const [activeTab, setActiveTab] = useState<'ai' | 'tts' | 'theme' | 'environment' | 'experimental'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'ai' | 'tts' | 'theme' | 'environment' | 'experimental' | 'about'>(initialTab);
   const [environmentSubTab, setEnvironmentSubTab] = useState<'gangs' | 'poverty'>('gangs');
   const [scannedModels, setScannedModels] = useState<ModelFile[]>([]);
   const [currentDirectory, setCurrentDirectory] = useState<string | null>(null);
@@ -342,6 +342,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               }`}
             >
               Experimental
+            </button>
+            <button
+              onClick={() => setActiveTab('about')}
+              className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors whitespace-nowrap ${
+                activeTab === 'about' ? 'bg-primary text-white' : 'bg-light-border dark:bg-base-700 hover:bg-black/10 dark:hover:bg-base-600 text-light-text dark:text-gray-200'
+              }`}
+            >
+              About
             </button>
           </div>
         </div>
@@ -2576,6 +2584,45 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               onUpdate={onExperimentalSettingsChange}
               activePersonalities={personalities}
             />
+          )}
+
+          {activeTab === 'about' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-light-text dark:text-gray-100 mb-2">Virtual Minds Framework</h3>
+                <p className="text-lg font-semibold text-primary mb-4">Version 24</p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-light-bg dark:bg-base-900 p-4 rounded-md border border-light-border dark:border-base-700">
+                  <h4 className="text-md font-semibold text-light-text dark:text-gray-200 mb-2">About the Framework</h4>
+                  <p className="text-sm text-light-text-secondary dark:text-gray-400 leading-relaxed">
+                    Virtual Minds Framework is an advanced AI personality simulation platform that enables the creation, 
+                    management, and simulation of complex AI personalities with autonomous conversations, dynamic social 
+                    interactions, and voice synthesis capabilities. The framework supports unlimited psychological testing, 
+                    behavioral analysis, and interactive scenario simulations.
+                  </p>
+                </div>
+
+                <div className="bg-light-bg dark:bg-base-900 p-4 rounded-md border border-light-border dark:border-base-700">
+                  <h4 className="text-md font-semibold text-light-text dark:text-gray-200 mb-2">Developer Information</h4>
+                  <p className="text-sm text-light-text-secondary dark:text-gray-400">
+                    <span className="font-mono text-primary">franks-apps.com</span>
+                  </p>
+                </div>
+
+                <div className="flex justify-center pt-4">
+                  <button
+                    onClick={() => {
+                      alert('Checking for updates...\n\nNo updates available at this time.\n\nYou are running the latest version (V24).');
+                    }}
+                    className="px-6 py-3 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors font-semibold"
+                  >
+                    🔍 Search for Updates
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
         </div>

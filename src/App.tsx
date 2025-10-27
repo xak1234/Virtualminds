@@ -2206,8 +2206,8 @@ const openWindow = (personalityId: string) => {
     // Stagger window positions deterministically to avoid overlap and keep the header reachable
     const vw = typeof window !== 'undefined' ? window.innerWidth : 1280;
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const defaultW = 450; // Reduced by 25% from 600px
-    const defaultH = 700;
+    const defaultW = 315; // Reduced by 30% from 450px
+    const defaultH = 315; // Equal to width for square initial size
     const pad = 80;
     const step = 36; // stagger step in px
     const count = windows.length; // number of windows already open
@@ -7841,7 +7841,7 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
           <div className="relative z-10 max-w-md w-full mx-auto p-8 bg-light-panel/90 dark:bg-base-800/90 rounded-lg border border-light-border dark:border-base-700 shadow-2xl backdrop-blur-md">
             <div className="text-center mb-8">
               <h1 className="font-mono text-3xl font-light text-light-text dark:text-gray-100 tracking-wide uppercase mb-2">
-                VIRTUAL MINDS FRAMEWORK V24
+                VIRTUAL MINDS FRAMEWORK
               </h1>
               <p className="text-sm text-light-text-secondary dark:text-gray-400">
                 Login Required
@@ -7870,6 +7870,13 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
                   </div>
                   
                 </div>
+              </div>
+              
+              {/* Version number at bottom of box */}
+              <div className="text-center mt-2 mb-2">
+                <p className="text-xs text-light-text-secondary dark:text-gray-500 font-mono">
+                  V24
+                </p>
               </div>
             </div>
           </div>

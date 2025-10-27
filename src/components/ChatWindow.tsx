@@ -97,7 +97,7 @@ const ChatBubble: React.FC<{ message: ChatMessage; personality: Personality; onR
         <AiAvatar personality={authorPersonality} className="shadow-sm ring-1 ring-purple-500/20 mt-0.5" />
       )}
       
-      <div className="flex flex-col gap-0.5 max-w-[75%]">
+      <div className="flex flex-col gap-0.5 max-w-[90%]">
         <div
           className={`px-3 py-2 rounded-xl shadow-sm user-select-text transition-all duration-200 hover:shadow-md ${
             isUser
