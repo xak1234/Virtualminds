@@ -66,14 +66,14 @@ export const DiscoverModal: React.FC<DiscoverModalProps> = ({
             {/* Create New Card */}
             <button
               onClick={handleCreateClick}
-              className="group relative bg-gradient-to-br from-primary/10 to-primary/5 dark:from-accent/10 dark:to-accent/5 hover:from-primary/20 hover:to-primary/10 dark:hover:from-accent/20 dark:hover:to-accent/10 border-2 border-primary/30 dark:border-accent/30 hover:border-primary dark:hover:border-accent rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              className="group relative bg-gradient-to-br from-primary/10 to-primary/5 dark:from-accent/10 dark:to-accent/5 hover:from-primary/20 hover:to-primary/10 dark:hover:from-accent/20 dark:hover:to-accent/10 border-2 border-primary/30 dark:border-accent/30 hover:border-primary dark:hover:border-accent rounded-xl p-4 xs:p-5 sm:p-6 flex flex-col items-center justify-center gap-2 xs:gap-3 transition-all duration-300 hover:scale-105 hover:shadow-xl"
             >
-              <div className="w-16 h-16 bg-primary dark:bg-accent rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <PlusIcon className="w-8 h-8 text-white dark:text-base-900" />
+              <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 bg-primary dark:bg-accent rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <PlusIcon className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-white dark:text-base-900" />
               </div>
               <div className="text-center">
-                <h3 className="text-xl font-bold text-light-text dark:text-gray-100 mb-2">Create New</h3>
-                <p className="text-sm text-light-text-secondary dark:text-gray-400">
+                <h3 className="text-lg xs:text-xl font-bold text-light-text dark:text-gray-100 mb-1 xs:mb-2">Create New</h3>
+                <p className="text-xs xs:text-sm text-light-text-secondary dark:text-gray-400">
                   Build a Mind from scratch using AI research
                 </p>
               </div>
@@ -83,14 +83,14 @@ export const DiscoverModal: React.FC<DiscoverModalProps> = ({
             {/* Quick Slots Card */}
             <button
               onClick={handleSlotsClick}
-              className="group relative bg-gradient-to-br from-purple-500/10 to-purple-500/5 hover:from-purple-500/20 hover:to-purple-500/10 border-2 border-purple-500/30 hover:border-purple-500 rounded-xl p-6 flex flex-col items-center justify-center gap-3 transition-all duration-300 hover:scale-105 hover:shadow-xl"
+              className="group relative bg-gradient-to-br from-purple-500/10 to-purple-500/5 hover:from-purple-500/20 hover:to-purple-500/10 border-2 border-purple-500/30 hover:border-purple-500 rounded-xl p-4 xs:p-5 sm:p-6 flex flex-col items-center justify-center gap-2 xs:gap-3 transition-all duration-300 hover:scale-105 hover:shadow-xl"
             >
-              <div className="w-16 h-16 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <CogIcon className="w-8 h-8 text-white" />
+              <div className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 bg-purple-600 dark:bg-purple-500 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <CogIcon className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 text-white" />
               </div>
               <div className="text-center">
-                <h3 className="text-xl font-bold text-light-text dark:text-gray-100 mb-2">Slots</h3>
-                <p className="text-sm text-light-text-secondary dark:text-gray-400">
+                <h3 className="text-lg xs:text-xl font-bold text-light-text dark:text-gray-100 mb-1 xs:mb-2">Slots</h3>
+                <p className="text-xs xs:text-sm text-light-text-secondary dark:text-gray-400">
                   Load or Unload Minds saved to quick slots
                 </p>
               </div>

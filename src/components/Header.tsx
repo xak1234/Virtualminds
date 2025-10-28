@@ -205,10 +205,10 @@ export const Header: React.FC<HeaderProps> = ({
       {onMobileMenuToggle && (
         <button
           onClick={onMobileMenuToggle}
-          className="lg:hidden p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary mr-1 sm:mr-2 flex-shrink-0"
+          className="lg:hidden p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary mr-1 sm:mr-2 flex-shrink-0"
           aria-label="Toggle mobile menu"
         >
-          <MenuIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <MenuIcon className="w-4 xs:w-5 sm:w-6 h-4 xs:h-5 sm:h-6 text-white" />
         </button>
       )}
       
@@ -272,22 +272,22 @@ export const Header: React.FC<HeaderProps> = ({
         {gangsEnabled && onGangDebugClick && (
           <button
             onClick={onGangDebugClick}
-            className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-900/30 border border-red-600/50"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-900/30 border border-red-600/50"
             aria-label="Gang Debug Window"
             title="Open Gang Debug Window"
           >
-            <PrisonIcon className="w-5 h-5 sm:w-6 sm:h-6 text-red-400 animate-pulse" />
+            <PrisonIcon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-red-400 animate-pulse" />
           </button>
         )}
         
         {gangsEnabled && onGangSettingsClick && (
           <button
             onClick={onGangSettingsClick}
-            className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-orange-900/30 border border-orange-600/50"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-orange-500 bg-orange-900/30 border border-orange-600/50"
             aria-label="Gang Settings"
             title="Open Gang Settings"
           >
-            <GangIcon className="w-5 h-5 sm:w-6 sm:h-6 text-orange-400" />
+            <GangIcon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-orange-400" />
           </button>
         )}
         
@@ -297,11 +297,11 @@ export const Header: React.FC<HeaderProps> = ({
               // Auto-proceed: Disable gang mode without confirmation
               onGangModeDisableAndStop();
             }}
-            className="p-1.5 sm:p-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-600 border-2 border-red-500 animate-pulse"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 bg-red-600 border-2 border-red-500 animate-pulse"
             aria-label="Disable Gang Mode & Stop"
             title="👊 Gangs Mode ON - Click to Turn OFF & Stop"
           >
-            <FistIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <FistIcon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-white" />
           </button>
         )}
 
@@ -309,63 +309,63 @@ export const Header: React.FC<HeaderProps> = ({
         {povertyEnabled && onPovertyDebugClick && (
           <button
             onClick={onPovertyDebugClick}
-            className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-900/30 border border-yellow-600/50"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-900/30 border border-yellow-600/50"
             aria-label="Poverty Debug Window"
             title="Open Poverty Debug Window"
           >
-            <span className="text-lg sm:text-2xl">📊</span>
+            <span className="text-base xs:text-lg sm:text-2xl">📊</span>
           </button>
         )}
 
         {povertyEnabled && onPovertySettingsClick && (
           <button
             onClick={onPovertySettingsClick}
-            className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-900/30 border border-yellow-600/50"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-900/30 border border-yellow-600/50"
             aria-label="Poverty Settings"
             title="Configure Poverty Simulation"
           >
-            <span className="text-lg sm:text-2xl">💸</span>
+            <span className="text-base xs:text-lg sm:text-2xl">💸</span>
           </button>
         )}
 
         {povertyEnabled && onPovertyDisable && (
           <button
             onClick={onPovertyDisable}
-            className="p-1.5 sm:p-2 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-600 border-2 border-yellow-500 animate-pulse"
+            className="p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-600 border-2 border-yellow-500 animate-pulse"
             aria-label="Disable Poverty Mode"
             title="💸 Poverty Mode ON - Click to Turn OFF"
           >
-            <span className="text-lg sm:text-2xl">⛔</span>
+            <span className="text-base xs:text-lg sm:text-2xl">⛔</span>
           </button>
         )}
         
         <button
           onClick={onGlobalTtsToggle}
-          className={`p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary ${
+          className={`p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary ${
             globalTtsEnabled ? 'bg-blue-100 dark:bg-blue-900/30' : ''
           }`}
           aria-label="Toggle global sound"
           title={globalTtsEnabled ? "Turn sound off globally" : "Turn sound on globally"}
         >
           {globalTtsEnabled ? (
-            <SpeakerOnIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <SpeakerOnIcon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-white" />
           ) : (
-            <SpeakerOffIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+            <SpeakerOffIcon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-white" />
           )}
         </button>
         <button
           onClick={onThemeToggle}
-          className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary"
+          className="p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Toggle theme"
         >
-          {theme === 'light' ? <MoonIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" /> : <SunIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />}
+          {theme === 'light' ? <MoonIcon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-white" /> : <SunIcon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-white" />}
         </button>
         <button
           onClick={onSettingsClick}
-          className="p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary"
+          className="p-1 xs:p-1.5 sm:p-2 rounded-md hover:bg-light-border dark:hover:bg-base-700 focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Open settings"
         >
-          <CogIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+          <CogIcon className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-white" />
         </button>
       </div>
     </header>

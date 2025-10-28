@@ -1071,7 +1071,7 @@ ${'='.repeat(80)}
           <div className="flex items-center gap-1 border-l border-light-border dark:border-base-600 pl-1 sm:pl-2">
             <button
               onClick={toggleErrorWarningMode}
-              className={`p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs flex items-center gap-1 ${
+              className={`p-0.5 xs:p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-[10px] xs:text-xs flex items-center gap-0.5 xs:gap-1 ${
                 isErrorWarningMode ? 'bg-red-500 text-white' : ''
               }`}
               title={`${isErrorWarningMode ? 'Show Standard Messages' : 'Show Errors/Warnings'} (Ctrl+E)`}
@@ -1122,7 +1122,7 @@ ${'='.repeat(80)}
             {currentUser && (
               <button
                 onClick={toggleSearchMode}
-                className={`p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs ${isSearchMode ? 'bg-primary text-white' : ''}`}
+                className={`p-0.5 xs:p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-[10px] xs:text-xs ${isSearchMode ? 'bg-primary text-white' : ''}`}
                 title="Search CLI history (Ctrl+F)"
               >
                 <span className="hidden sm:inline">🔍 Search</span>
@@ -1131,7 +1131,7 @@ ${'='.repeat(80)}
             )}
             <button
               onClick={scrollToTop}
-              className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs hidden xs:inline-block"
+              className="p-0.5 xs:p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-[10px] xs:text-xs hidden xs:inline-block"
               title="Scroll to top (Home)"
             >
               <span className="hidden sm:inline">⬆️ Top</span>
@@ -1139,7 +1139,7 @@ ${'='.repeat(80)}
             </button>
             <button
               onClick={scrollToBottom}
-              className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs hidden xs:inline-block"
+              className="p-0.5 xs:p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-[10px] xs:text-xs hidden xs:inline-block"
               title="Scroll to bottom (End)"
             >
               <span className="hidden sm:inline">⬇️ Bottom</span>
@@ -1158,7 +1158,7 @@ ${'='.repeat(80)}
             <div className="flex items-center gap-1 border-l border-light-border dark:border-base-600 pl-1 sm:pl-2 hidden sm:flex">
               <button
                 onClick={copyCliHistory}
-                className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs"
+                className="p-0.5 xs:p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-[10px] xs:text-xs"
                 title="Copy CLI history to clipboard"
               >
                 <span className="hidden md:inline">📋 Copy</span>
@@ -1166,7 +1166,7 @@ ${'='.repeat(80)}
               </button>
               <button
                 onClick={saveCliHistory}
-                className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-xs"
+                className="p-0.5 xs:p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded text-[10px] xs:text-xs"
                 title="Save CLI history as file"
               >
                 <span className="hidden md:inline">💾 Save</span>
@@ -1178,14 +1178,14 @@ ${'='.repeat(80)}
             <div className="flex items-center gap-1 hidden sm:flex">
               <button
                 onClick={() => onHeightChange(50)}
-                className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
+                className="p-0.5 xs:p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
                 title="Extend CLI Up (+50px)"
               >
                 <PlusIcon className="w-3 h-3" />
               </button>
               <button
                 onClick={() => onHeightChange(-50)}
-                className="p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
+                className="p-0.5 xs:p-0.5 sm:p-1 hover:bg-light-border dark:hover:bg-base-700 rounded"
                 title="Shrink CLI Down (-50px)"
               >
                 <MinimizeIcon className="w-3 h-3" />

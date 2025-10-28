@@ -9,6 +9,14 @@ export default {
     extend: {
       screens: {
         'xs': '475px',
+        '2xs': '360px',
+      },
+      fontSize: {
+        '2xs': '0.625rem',
+      },
+      spacing: {
+        '0.5': '0.125rem',
+        '1.5': '0.375rem',
       },
       colors: {
         // Dark theme colors

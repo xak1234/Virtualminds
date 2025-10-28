@@ -268,7 +268,7 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
           )}
           <div
             key={p.id}
-            className={`w-full text-left p-4 rounded-md flex items-center gap-4 transition-colors duration-200 group relative ${
+            className={`w-full text-left p-2 xs:p-3 sm:p-4 rounded-md flex items-center gap-2 xs:gap-3 sm:gap-4 transition-colors duration-200 group relative ${
               isKilled && !gangsEnabled
                 ? 'bg-red-900/40 border border-red-600 opacity-75'
                 : isCurrentSpeaker
@@ -356,7 +356,7 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
                   onPersonalitySelect(p.id);
                 }
               }}
-              className="flex items-center gap-4 flex-1 min-w-0 btn-press"
+              className="flex items-center gap-2 xs:gap-3 sm:gap-4 flex-1 min-w-0 btn-press"
               title={
                 isKilled || memberStatus?.killed
                   ? "KILLED - Cannot converse or interact"
@@ -366,12 +366,12 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
               }
               disabled={isKilled || (gangsEnabled && (memberStatus?.imprisoned || memberStatus?.killed))}
             >
-              <div className="relative w-8 h-8 flex-shrink-0">
+              <div className="relative w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 flex-shrink-0">
                 {p.profileImage ? (
                   <img 
                     src={p.profileImage} 
                     alt={p.name} 
-                    className={`w-8 h-8 rounded-full object-cover ${
+                    className={`w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 rounded-full object-cover ${
                       isKilled && !gangsEnabled 
                         ? 'grayscale opacity-60' 
                         : memberStatus?.imprisoned 
@@ -380,7 +380,7 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
                     }`}
                   />
                 ) : (
-                  <UserIcon className={`w-8 h-8 p-1 ${
+                  <UserIcon className={`w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8 p-1 ${
                     isKilled && !gangsEnabled 
                       ? 'text-red-600 dark:text-red-500' 
                       : memberStatus?.imprisoned 
@@ -523,11 +523,11 @@ export const PersonalityPanel: React.FC<PersonalityPanelProps> = ({
             </button>
             <button
               onClick={(e) => handleRemoveClick(e, p.id)}
-              className={`${isKilled ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200 p-1 hover:bg-red-500/20 rounded-md flex-shrink-0 btn-press`}
+              className={`${isKilled ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200 p-0.5 xs:p-1 hover:bg-red-500/20 rounded-md flex-shrink-0 btn-press`}
               title={isKilled ? 'Being removed...' : `Remove ${p.name}`}
               disabled={isKilled}
             >
-              <CloseIcon className={`w-4 h-4 ${isKilled ? 'text-red-900' : 'text-red-500 hover:text-red-600'}`} />
+              <CloseIcon className={`w-3 h-3 xs:w-4 xs:h-4 ${isKilled ? 'text-red-900' : 'text-red-500 hover:text-red-600'}`} />
             </button>
           </div>
           {/* Small separator between different gangs */}

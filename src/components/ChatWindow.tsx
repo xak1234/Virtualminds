@@ -402,14 +402,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             )}
             <div ref={messagesEndRef} />
           </div>
-          <div className="p-3 border-t border-light-border dark:border-base-700">
+          <div className="p-2 xs:p-3 border-t border-light-border dark:border-base-700">
             {isPersonalityKilled && (
               <div className="mb-2 text-center text-xs font-mono uppercase tracking-[0.3em] text-red-600 dark:text-red-400 flex items-center justify-center gap-2">
                 <span className="text-sm">💀</span>
                 <span>No responses - personality deceased</span>
               </div>
             )}
-            <form onSubmit={handleSubmit} className="flex items-center gap-3">
+            <form onSubmit={handleSubmit} className="flex items-center gap-1 xs:gap-2 sm:gap-3">
               <input
                 type="text"
                 value={interim ? `${input}${input ? ' ' : ''}${interim}` : input}
@@ -420,7 +420,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                   e.stopPropagation();
                 }}
                 placeholder="> /clear to clear the window"
-                className="flex-1 bg-light-panel/80 dark:bg-base-800/80 backdrop-blur-sm border border-light-border dark:border-base-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 placeholder:text-green-400 placeholder:text-opacity-70 chat-input-modern chat-input-cursor"
+                className="flex-1 bg-light-panel/80 dark:bg-base-800/80 backdrop-blur-sm border border-light-border dark:border-base-600 rounded-lg px-2 xs:px-3 py-1.5 xs:py-2 text-xs xs:text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 placeholder:text-green-400 placeholder:text-opacity-70 chat-input-modern chat-input-cursor"
                 disabled={isLoading || isConversing || isPersonalityKilled}
                 style={inputTextColor ? { color: inputTextColor } : undefined}
               />
@@ -429,24 +429,24 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 onClick={() => {
                   if (isListening) { stopListening(false); } else { startListening(); }
                 }}
-                className={`p-2 rounded-lg transition-colors duration-200 ${
+                className={`p-1.5 xs:p-2 rounded-lg transition-colors duration-200 ${
                   isListening ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-black/10 dark:bg-base-700 text-light-text dark:text-gray-300 hover:bg-black/20 dark:hover:bg-base-600'
                 }`}
                 title={isListening ? 'Stop voice input' : 'Start voice input'}
                 disabled={isLoading || isConversing || isPersonalityKilled || !getSpeechRecognition()}
               >
                 {isListening ? (
-                  <MicrophoneOffIcon className="w-5 h-5" />
+                  <MicrophoneOffIcon className="w-4 h-4 xs:w-5 xs:h-5" />
                 ) : (
-                  <MicrophoneIcon className="w-5 h-5" />
+                  <MicrophoneIcon className="w-4 h-4 xs:w-5 xs:h-5" />
                 )}
               </button>
               <button
                 type="submit"
-                className="bg-primary text-white p-2 rounded-lg hover:bg-blue-600 disabled:bg-base-600 disabled:cursor-not-allowed transition-colors duration-200"
+                className="bg-primary text-white p-1.5 xs:p-2 rounded-lg hover:bg-blue-600 disabled:bg-base-600 disabled:cursor-not-allowed transition-colors duration-200"
                 disabled={isLoading || (!input.trim() && !interim.trim()) || isConversing || isPersonalityKilled}
               >
-                <PaperAirplaneIcon className="w-5 h-5" />
+                <PaperAirplaneIcon className="w-4 h-4 xs:w-5 xs:h-5" />
               </button>
             </form>
           </div>

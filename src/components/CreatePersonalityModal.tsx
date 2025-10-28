@@ -990,11 +990,11 @@ export const CreatePersonalityModal: React.FC<CreatePersonalityModalProps> = ({ 
            )}
         </div>
 
-        <div className="p-4 bg-light-bg dark:bg-base-900 border-t border-light-border dark:border-base-700 mt-auto flex justify-between items-center rounded-b-lg">
-          <div>{step === 5 && (<><button onClick={handleSave} className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors mr-2">Save</button><button onClick={handleExport} className="px-4 py-2 bg-base-600 text-white rounded-md hover:bg-base-500 transition-colors">Export .zip</button></>)}</div>
+        <div className="p-3 xs:p-4 bg-light-bg dark:bg-base-900 border-t border-light-border dark:border-base-700 mt-auto flex justify-between items-center rounded-b-lg">
+          <div>{step === 5 && (<><button onClick={handleSave} className="px-3 xs:px-4 py-1.5 xs:py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors mr-2 text-sm xs:text-base">Save</button><button onClick={handleExport} className="px-3 xs:px-4 py-1.5 xs:py-2 bg-base-600 text-white rounded-md hover:bg-base-500 transition-colors text-sm xs:text-base">Export .zip</button></>)}</div>
           <div className="flex gap-2">
-            {step > 1 && <button onClick={() => setStep(s => s - 1)} className="px-4 py-2 bg-black/10 dark:bg-base-600 text-light-text dark:text-white rounded-md hover:bg-black/20 dark:hover:bg-base-500 transition-colors">Back</button>}
-            {step < 5 && (<button onClick={step === 1 ? handleResearch : () => setStep(s => s + 1)} className="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors disabled:bg-base-600 disabled:cursor-not-allowed flex items-center gap-2" disabled={isLoading || (step === 1 && !name.trim())}>
+            {step > 1 && <button onClick={() => setStep(s => s - 1)} className="px-3 xs:px-4 py-1.5 xs:py-2 bg-black/10 dark:bg-base-600 text-light-text dark:text-white rounded-md hover:bg-black/20 dark:hover:bg-base-500 transition-colors text-sm xs:text-base">Back</button>}
+            {step < 5 && (<button onClick={step === 1 ? handleResearch : () => setStep(s => s + 1)} className="px-3 xs:px-4 py-1.5 xs:py-2 bg-primary text-white rounded-md hover:bg-blue-600 transition-colors disabled:bg-base-600 disabled:cursor-not-allowed flex items-center gap-2 text-sm xs:text-base" disabled={isLoading || (step === 1 && !name.trim())}>
               {isResearching && (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               )}
