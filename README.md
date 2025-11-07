@@ -4,7 +4,7 @@
 
 # Virtual Minds Framework
 
-**Advanced AI Personality Simulation Platform**
+**Advanced AI Personality Simulation Platform - BETA VERSION**
 
 A cutting-edge framework for creating, managing, and simulating complex AI personalities with autonomous conversations, prison gang dynamics, drug economies, and voice cloning capabilities. **Unlimited psychological testing and interviewing scenarios** for research, therapy, behavioral analysis, **law enforcement training, and criminal profiling**.
 
