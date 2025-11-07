@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Virtual Minds V24</title>
+    <meta http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+               script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://aistudiocdn.com https://fonts.googleapis.com;
+               style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+               img-src 'self' data: https: blob:;
+               connect-src 'self' https://generativelanguage.googleapis.com https://api.openai.com https://api.elevenlabs.io https://texttospeech.googleapis.com https://speech.googleapis.com https://api.github.com https://huggingface.co https://cdn.jsdelivr.net;
+               font-src 'self' https://fonts.gstatic.com;
+               object-src 'none';
+               base-uri 'self';
+               form-action 'self';
+               frame-ancestors 'none';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <script>
       // Apply dark theme class ASAP to avoid light flash and ensure visibility
       (function() {

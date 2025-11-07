@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import bcrypt from 'bcryptjs';
 import type { Personality, ChatMessage, CliOutput, ModelConfig, UserData, WindowState, TtsConfig, ExperimentalSettings } from './types';
 import { MessageAuthor, CliOutputType, ApiProvider, WindowStatus, TtsProvider, TtsEmotion } from './types';
 import { getDefaultExperimentalSettings } from './components/ExperimentalSettingsPanel';
@@ -5315,9 +5316,20 @@ Examples of good responses: "Albert Einstein", "Madonna", "Napoleon Bonaparte"`;
             commandResponse(`Usage: login admin [password]`, CliOutputType.ERROR);
             return;
           }
-          
-          if (password !== 'superuser') {
-            commandResponse(`Error: Invalid admin password.`, CliOutputType.ERROR);
+
+          // Get admin password hash from localStorage or use default for development
+          const adminPasswordHash = localStorage.getItem('adminPasswordHash') ||
+            '$2b$10$.D78Do6cd210Z4tUoOxwc.nNtXv/f4GiSfll4FESoUPKrxTuH6GNW'; // bcrypt hash for 'superuser'
+
+          try {
+            const isValidPassword = await bcrypt.compare(password, adminPasswordHash);
+            if (!isValidPassword) {
+              commandResponse(`Error: Invalid admin password.`, CliOutputType.ERROR);
+              return;
+            }
+          } catch (error) {
+            console.error('Password verification error:', error);
+            commandResponse(`Error: Authentication system error.`, CliOutputType.ERROR);
             return;
           }
           

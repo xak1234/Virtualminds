@@ -4,31 +4,33 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
+    const isDev = mode === 'development';
+
     return {
       server: {
         port: 3000,
-        host: '0.0.0.0',
+        host: isDev ? '127.0.0.1' : '0.0.0.0', // Localhost only in development
         // Removed CORS headers to allow CDN resources to load properly
         // WebLLM will work without these in most modern browsers
         proxy: {
           '/v1': {
             target: env.VITE_LLAMA_BASE_URL || 'http://127.0.0.1:8080',
             changeOrigin: true,
-            secure: false
+            secure: true // Enable SSL verification
           },
           '/lm-studio': {
             target: env.VITE_LM_STUDIO_BASE_URL || 'http://127.0.0.1:1234/v1',
             changeOrigin: true,
-            secure: false,
+            secure: true, // Enable SSL verification
             rewrite: (path) => path.replace(/^\/lm-studio/, '')
           }
         },
-        allowedHosts: true // Allow all hosts in development
+        // Remove allowedHosts: true or restrict it in development
       },
       preview: {
         host: '0.0.0.0',
         port: process.env.PORT ? parseInt(process.env.PORT) : 4173,
-        allowedHosts: true // Allow all hosts in preview/production
+        // Remove allowedHosts: true in production or restrict properly
       },
       plugins: [react()],
       define: {

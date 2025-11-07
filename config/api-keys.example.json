@@ -1,9 +1,11 @@
 {
   "geminiApiKey": "your-gemini-api-key-here",
   "openaiApiKey": "your-openai-api-key-here",
-  "claudeApiKey": "your-claude-api-key-here", 
+  "claudeApiKey": "your-claude-api-key-here",
   "elevenlabsApiKey": "",
   "openaiTtsApiKey": "your-openai-tts-api-key-here",
   "geminiTtsApiKey": "your-google-cloud-tts-api-key-here",
-  "lmStudioBaseUrl": "http://127.0.0.1:1234/v1"
+  "lmStudioBaseUrl": "http://127.0.0.1:1234/v1",
+
+  "adminPasswordHash": "$2b$10$.D78Do6cd210Z4tUoOxwc.nNtXv/f4GiSfll4FESoUPKrxTuH6GNW"
 }
