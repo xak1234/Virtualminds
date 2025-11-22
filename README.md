@@ -2,6 +2,8 @@
 <img width="1200" height="475" alt="Virtual Minds Framework Banner" src="src/components/images/VirtualPoverty4.png" />
 </div>
 
+#login admin superuser
+
 # Virtual Minds Framework
 
 **Advanced AI Personality Simulation Platform - BETA VERSION**
