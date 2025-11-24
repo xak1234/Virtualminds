@@ -98,16 +98,15 @@ cd virtualminds
 # 2. Install dependencies
 npm install
 
-# 3. Set up API keys
-cp api-keys.example.json api-keys.json
-# Edit api-keys.json with your actual API keys
-# ⚠️  REQUIRED: At least one AI provider key for responses
-# ⚠️  OPTIONAL: TTS provider keys only if using cloud TTS
-
-# 4. Start the development server
+# 3. Start the development server
 npm run dev
 
-# 5. Open browser at http://localhost:5173
+# 4. Open browser at http://localhost:3000
+
+# 5. Set up API keys via Settings UI
+# Click Settings → Enter your API keys
+# ⚠️  REQUIRED: At least one AI provider key for responses
+# ⚠️  OPTIONAL: TTS provider keys only if using cloud TTS
 ```
 
 ### Your First Conversation
@@ -743,25 +742,29 @@ Comprehensive poverty simulation:
 
 ### API Keys
 
-**REQUIRED for AI Responses:**
-Create `api-keys.json` with at least one AI provider:
-```json
-{
-  "geminiApiKey": "your-gemini-api-key",     // REQUIRED for AI responses
-  "openaiApiKey": "your-openai-api-key",     // REQUIRED for AI responses  
-  "claudeApiKey": "your-claude-api-key"      // REQUIRED for AI responses
-}
-```
+**All API keys are managed via the Settings UI:**
+
+1. Start the application: `npm run dev`
+2. Click the Settings icon or use Settings panel
+3. Navigate to API Keys section
+4. Enter your API keys:
+
+**REQUIRED for AI Responses (enter at least one):**
+- **Gemini API Key**: For Google Gemini AI provider
+- **OpenAI API Key**: For OpenAI GPT provider
+- **Claude API Key**: For Anthropic Claude provider
 
 **OPTIONAL for TTS (Text-to-Speech):**
-Add TTS provider keys if using cloud TTS:
-```json
-{
-  "elevenlabsApiKey": "your-elevenlabs-key",  // For ElevenLabs TTS
-  "azureApiKey": "your-azure-key",            // For Azure TTS
-  
-}
-```
+- **ElevenLabs API Key**: For ElevenLabs TTS
+- **Azure API Key**: For Azure TTS
+- **OpenAI TTS API Key**: For OpenAI TTS
+- **Gemini TTS API Key**: For Google Cloud TTS
+
+**Security:**
+- All keys stored locally in your browser only
+- Keys never sent to any server
+- You maintain full control of your API keys
+- Can be cleared anytime via Settings
 
 **FREE Alternatives (No API Keys Required):**
 - **Browser TTS**: Uses your system's built-in voices
@@ -949,12 +952,14 @@ docker-compose up -d
 
 **API Key Errors**
 ```bash
-# Verify keys are correct
-cat api-keys.json
+# Check if keys are set via Settings UI
+# Open Settings → API Keys section
 
-# Test keys
+# Test keys via CLI
 api test google
 api test openai
+
+# Or check browser console for API key debug messages
 ```
 
 **TTS Not Working**

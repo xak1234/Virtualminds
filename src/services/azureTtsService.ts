@@ -41,7 +41,7 @@ export const generateSpeech = async (
     try {
       finalApiKey = await apiKeyService.getApiKey('azureApiKey');
     } catch (error) {
-      console.warn('Failed to fetch Azure API key from server:', error);
+      console.warn('Failed to get Azure API key from localStorage:', error);
       finalApiKey = null;
     }
   }

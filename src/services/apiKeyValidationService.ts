@@ -255,96 +255,13 @@ export const apiKeyValidationService = ApiKeyValidationService.getInstance();
 
 /**
  * Validate all available API keys and report status via callback
- * This function is used for startup validation in App.tsx
+ * NOTE: This function is deprecated and no longer called automatically.
+ * API keys are now managed locally via UI Settings only.
+ * Kept for potential manual validation feature in the future.
  */
 export async function validateAllKeys(
   messageCallback: (message: string, type: 'success' | 'error' | 'info') => void
 ): Promise<void> {
-  const { apiKeyService } = await import('./apiKeyService');
-  
-  messageCallback('🔑 Validating API keys...', 'info');
-  
-  try {
-    // Get all available API keys
-    const result = await apiKeyService.fetchApiKeys();
-    if (!result.success || !result.keys) {
-      messageCallback('❌ Failed to fetch API keys from server', 'error');
-      return;
-    }
-    
-    const keys = result.keys;
-    let validCount = 0;
-    let totalCount = 0;
-    
-    // Validate OpenAI key
-    if (keys.openaiApiKey) {
-      totalCount++;
-      const validation = await apiKeyValidationService.validateOpenAiKey(keys.openaiApiKey);
-      if (validation.isValid) {
-        validCount++;
-        messageCallback('✅ OpenAI API key is valid', 'success');
-      } else {
-        messageCallback(`❌ OpenAI API key is invalid: ${validation.error}`, 'error');
-      }
-    }
-    
-    // Validate Gemini key
-    if (keys.geminiApiKey) {
-      totalCount++;
-      const validation = await apiKeyValidationService.validateGeminiKey(keys.geminiApiKey);
-      if (validation.isValid) {
-        validCount++;
-        messageCallback('✅ Google Gemini API key is valid', 'success');
-      } else {
-        messageCallback(`❌ Google Gemini API key is invalid: ${validation.error}`, 'error');
-      }
-    }
-    
-    // Validate ElevenLabs key
-    if (keys.elevenlabsApiKey) {
-      totalCount++;
-      const validation = await apiKeyValidationService.validateElevenLabsKey(keys.elevenlabsApiKey);
-      if (validation.isValid) {
-        validCount++;
-        messageCallback('✅ ElevenLabs API key is valid', 'success');
-      } else {
-        messageCallback(`❌ ElevenLabs API key is invalid: ${validation.error}`, 'error');
-      }
-    }
-    
-    // Validate Claude key
-    if (keys.claudeApiKey) {
-      totalCount++;
-      const validation = await apiKeyValidationService.validateClaudeKey(keys.claudeApiKey);
-      if (validation.isValid) {
-        validCount++;
-        messageCallback('✅ Claude API key is valid', 'success');
-      } else {
-        messageCallback(`❌ Claude API key is invalid: ${validation.error}`, 'error');
-      }
-    }
-    
-    // Validate Azure key (if available)
-    if (keys.azureApiKey) {
-      totalCount++;
-      const validation = await apiKeyValidationService.validateAzureKey(keys.azureApiKey);
-      if (validation.isValid) {
-        validCount++;
-        messageCallback('✅ Azure API key is valid', 'success');
-      } else {
-        messageCallback(`❌ Azure API key is invalid: ${validation.error}`, 'error');
-      }
-    }
-    
-    // Summary message
-    if (totalCount === 0) {
-      messageCallback('ℹ️ No API keys found to validate', 'info');
-    } else {
-      messageCallback(`🔑 API Key validation complete: ${validCount}/${totalCount} keys valid`, 
-        validCount === totalCount ? 'success' : 'info');
-    }
-    
-  } catch (error) {
-    messageCallback(`❌ API key validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
-  }
+  messageCallback('ℹ️ API keys are managed locally via Settings UI only', 'info');
+  messageCallback('ℹ️ No automatic validation performed', 'info');
 }

@@ -57,21 +57,18 @@ The `api-keys.json` file is already added to `.gitignore`, so it will never be c
 
 ## 🚀 How It Works
 
-### Development Mode
-- When running locally (`npm run dev`), the app loads API keys from `api-keys.json`
-- The file is served statically by Vite's dev server
-- API keys are cached for 5 minutes to reduce file reads
-
-### Production Mode
-- When deployed, the app fetches API keys from `https://criminaminds2.onrender.com/api/keys`
-- This endpoint should return the same JSON structure as the local file
+### API Key Management
+- API keys are stored in browser localStorage only
+- All keys must be entered via the Settings UI in the application
+- Keys are never stored in files or on any server
+- Each user manages their own API keys locally
 
 ## 🧪 Testing
 
 ### Test the Setup
-1. Open `test-api-keys.html` in your browser
-2. Click "Fetch API Keys from Server" to test loading
-3. Check the browser console for loading messages
+1. Start the application: `npm run dev`
+2. Open Settings panel
+3. Enter your API keys in the appropriate fields
 
 ### Verify in Application
 1. Start the development server: `npm run dev`

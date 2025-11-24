@@ -49,20 +49,18 @@ setup-local-models.bat
 
 ## API Keys Configuration
 
-The application supports dual API key management:
-- **Development**: Uses `api-keys.json` (gitignored) served by Vite
-- **Production**: Fetches from `https://criminaminds2.onrender.com/api/keys`
+API keys are managed through the Settings UI:
+- All API keys stored in browser localStorage only
+- Enter keys via Settings panel in the application
+- Keys are never stored on any server
+- Each user manages their own keys locally
 
-Required keys in `api-keys.json`:
-```json
-{
-  "geminiApiKey": "your-gemini-key",
-  "openaiApiKey": "your-openai-key", 
-  "elevenlabsApiKey": "your-elevenlabs-key",
-  "openaiTtsApiKey": "your-openai-tts-key",
-  "geminiTtsApiKey": "your-google-cloud-tts-key"
-}
-```
+Required API keys (enter via Settings UI):
+- **Gemini API Key**: For Google Gemini AI provider
+- **OpenAI API Key**: For OpenAI GPT provider
+- **ElevenLabs API Key**: For ElevenLabs TTS (optional)
+- **OpenAI TTS API Key**: For OpenAI TTS (optional)
+- **Gemini TTS API Key**: For Google Cloud TTS (optional)
 
 ## Architecture Overview
 

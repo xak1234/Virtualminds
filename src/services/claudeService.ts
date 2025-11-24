@@ -5,7 +5,7 @@ import { logApiUsage, estimateTokenCount } from './costTrackingService';
 import { generateResponse as lmStudioGenerateResponse, getAvailableModels as getLMStudioModels, testConnection } from './lmStudioService';
 
 // Claude model fallback order - now using LM Studio models
-// These will be dynamically fetched from LM Studio server
+// These will be retrieved from localStorage or LM Studio configuration
 const MODEL_FALLBACK_ORDER = [
   'claude-3-5-sonnet-20241022',
   'claude-3-5-haiku-20241022', 

@@ -7,7 +7,7 @@ import { logApiUsage, estimateTokenCount } from './costTrackingService';
 const API_URL = 'https://api.openai.com/v1/chat/completions';
 const MODELS_URL = 'https://api.openai.com/v1/models';
 
-// OpenAI API key can be provided via parameter, fetched from server, or environment variable
+// OpenAI API key can be provided via parameter or retrieved from localStorage
 
 // Model fallback order - from most capable to most basic
 const MODEL_FALLBACK_ORDER = [

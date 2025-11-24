@@ -1,5 +1,5 @@
 /**
- * Service for fetching API keys from the Render server
+ * Service for managing API keys from localStorage
  */
 
 export interface ApiKeys {
@@ -24,14 +24,7 @@ class ApiKeyService {
   private static instance: ApiKeyService;
   private cachedKeys: ApiKeys | null = null;
   private cacheTimestamp: number = 0;
-  private readonly CACHE_DURATION = Infinity; // Never expire cache (disabled expiration)
-  // Prefer current origin in production so frontend/backend stay in sync when deployed together.
-  // Fallback to env override or the known Render URL.
-  private readonly RENDER_SERVER_URL = (
-    typeof window !== 'undefined' && window.location?.origin
-  ) || (import.meta as any)?.env?.VITE_RENDER_SERVER_URL
-    || 'https://criminaminds2.onrender.com';
-  private readonly IS_DEVELOPMENT = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  private readonly CACHE_DURATION = Infinity; // Cache never expires
 
   private constructor() {}
 
@@ -43,11 +36,11 @@ class ApiKeyService {
   }
 
   /**
-   * Fetch API keys - DEPRECATED: Now only uses UI-set localStorage keys
-   * This method is kept for compatibility but returns empty keys
+   * Get API keys from localStorage only
+   * All keys must be set via the Settings UI
    */
   public async fetchApiKeys(): Promise<ApiKeyResponse> {
-    console.log('[API KEY DEBUG] File-based API keys disabled - use Settings UI to set keys');
+    console.log('[API KEY DEBUG] Using localStorage keys - set via Settings UI');
     return {
       success: true,
       keys: {
@@ -135,7 +128,7 @@ class ApiKeyService {
   }
 
   /**
-   * Get cached keys without fetching from server
+   * Get cached keys from memory
    */
   public getCachedKeys(): ApiKeys | null {
     return this.isCacheValid() ? this.cachedKeys : null;

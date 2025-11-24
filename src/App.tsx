@@ -1505,51 +1505,8 @@ const App: React.FC = () => {
     updateAvailableModels();
   }, [apiProvider, localModels]);
 
-  // API Keys initialization effect - fetch from server on app start
-  useEffect(() => {
-    const initializeApiKeys = async () => {
-      try {
-        console.log('Fetching API keys from server...');
-        const result = await apiKeyService.fetchApiKeys();
-        if (result.success && result.keys) {
-          console.log('API keys loaded from server:', Object.keys(result.keys));
-          
-          // Set server keys into state if localStorage keys are not present
-          const localElevenLabsKey = localStorage.getItem(ELEVENLABS_API_KEY_STORAGE_KEY);
-          if (result.keys.elevenlabsApiKey && (!localElevenLabsKey || localElevenLabsKey.trim() === '')) {
-            setElevenLabsApiKey(result.keys.elevenlabsApiKey);
-            console.log('Set ElevenLabs API key from server');
-          }
-          
-          const localOpenAiTtsKey = localStorage.getItem(OPENAI_TTS_API_KEY_STORAGE_KEY);
-          if (result.keys.openaiTtsApiKey && (!localOpenAiTtsKey || localOpenAiTtsKey.trim() === '')) {
-            setOpenaiTtsApiKey(result.keys.openaiTtsApiKey);
-          }
-          
-          const localGeminiTtsKey = localStorage.getItem(GEMINI_TTS_API_KEY_STORAGE_KEY);
-          if (result.keys.geminiTtsApiKey && (!localGeminiTtsKey || localGeminiTtsKey.trim() === '')) {
-            setGeminiTtsApiKey(result.keys.geminiTtsApiKey);
-          }
-          
-          const localOpenAiKey = localStorage.getItem(OPENAI_CHAT_API_KEY_STORAGE_KEY);
-          if (result.keys.openaiApiKey && (!localOpenAiKey || localOpenAiKey.trim() === '')) {
-            setOpenAiApiKey(result.keys.openaiApiKey);
-          }
-          
-          const localGeminiKey = localStorage.getItem(GEMINI_API_KEY_STORAGE_KEY);
-          if (result.keys.geminiApiKey && (!localGeminiKey || localGeminiKey.trim() === '')) {
-            setGeminiApiKey(result.keys.geminiApiKey);
-          }
-        } else {
-          console.warn('Failed to fetch API keys from server:', result.error);
-        }
-      } catch (error) {
-        console.error('Error initializing API keys:', error);
-      }
-    };
-
-    initializeApiKeys();
-  }, []);
+  // API Keys are now only managed via localStorage (UI Settings)
+  // No server fetching needed - keys are set by user in the Settings panel
 
   // Local model initialization effect - restore previously loaded models
   useEffect(() => {
@@ -1756,21 +1713,7 @@ const App: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [addCliMessage]);
 
-  // Validate API keys shortly after startup; warn in CLI if any stored key fails validation
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      try {
-        // Small delay to allow apiKeyService to fetch from server
-        await new Promise(res => setTimeout(res, 1500));
-        await validateAllKeys((text, type) => { if (!cancelled) addCliMessage(text, type); });
-      } catch {
-        // Do not spam CLI on internal errors here
-      }
-    };
-    run();
-    return () => { cancelled = true; };
-  }, [addCliMessage]);
+  // API key validation removed - keys are managed locally via UI Settings only
   
   const getChatHistory = (personalityId: string): ChatMessage[] => {
     if (currentUser) {
