@@ -16,17 +16,49 @@
                form-action 'self';
                frame-ancestors 'none';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
+    <style>
+      /* CRITICAL: Force dark theme immediately before any JavaScript */
+      html, body {
+        background-color: #0f1419 !important;
+        color: #d1d5db !important;
+        margin: 0;
+        padding: 0;
+      }
+      #root {
+        min-height: 100vh !important;
+        background-color: #0f1419 !important;
+      }
+      /* Override light theme classes */
+      .bg-light-panel { background-color: rgba(33, 38, 45, 0.9) !important; }
+      .bg-light-bg { background-color: rgba(15, 20, 25, 0.8) !important; }
+      .text-light-text { color: #d1d5db !important; }
+      .text-light-text-secondary { color: #9ca3af !important; }
+      .border-light-border { border-color: #30363d !important; }
+    </style>
     <script>
+      // CRITICAL: Apply dark class IMMEDIATELY
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+      
       // Apply dark theme class ASAP to avoid light flash and ensure visibility
       (function() {
         try {
           var KEY = 'cmf_theme';
           var saved = localStorage.getItem(KEY);
-          var isDark = saved ? saved === 'dark' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          if (isDark) document.documentElement.classList.add('dark');
+          // Default to dark theme
+          var isDark = saved ? saved === 'dark' : true;
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.body.classList.add('dark');
+          }
+          // Save default if not set
+          if (!saved) {
+            localStorage.setItem(KEY, 'dark');
+          }
         } catch (e) {
           // If localStorage is not available, default to dark for better contrast
           document.documentElement.classList.add('dark');
+          document.body.classList.add('dark');
         }
       })();
     </script>
@@ -54,7 +86,7 @@
 </script>
 <link rel="stylesheet" href="/src/index.css">
 </head>
-  <body class="bg-light-bg text-light-text dark:bg-base-900 dark:text-gray-300">
+  <body class="dark bg-base-900 text-gray-300">
     <div id="root"></div>
     <script type="module" src="/src/index.tsx"></script>
   </body>

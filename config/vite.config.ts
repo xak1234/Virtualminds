@@ -7,6 +7,14 @@ export default defineConfig(({ mode }) => {
     const isDev = mode === 'development';
 
     return {
+      base: '/',
+      build: {
+        outDir: '../dist',
+        emptyOutDir: true,
+        sourcemap: false,
+        minify: 'esbuild',
+        cssMinify: true,
+      },
       server: {
         port: 3000,
         host: isDev ? '127.0.0.1' : '0.0.0.0', // Localhost only in development
@@ -31,6 +39,7 @@ export default defineConfig(({ mode }) => {
       preview: {
         host: '0.0.0.0',
         port: process.env.PORT ? parseInt(process.env.PORT) : 4173,
+        strictPort: false,
         allowedHosts: ['virtualminds.uk', '.virtualminds.uk'],
       },
       plugins: [react()],
