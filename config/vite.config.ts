@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
         host: isDev ? '127.0.0.1' : '0.0.0.0', // Localhost only in development
         // Removed CORS headers to allow CDN resources to load properly
         // WebLLM will work without these in most modern browsers
+        allowedHosts: ['virtualminds.uk', '.virtualminds.uk'],
         proxy: {
           '/v1': {
             target: env.VITE_LLAMA_BASE_URL || 'http://127.0.0.1:8080',
@@ -30,7 +31,7 @@ export default defineConfig(({ mode }) => {
       preview: {
         host: '0.0.0.0',
         port: process.env.PORT ? parseInt(process.env.PORT) : 4173,
-        // Remove allowedHosts: true in production or restrict properly
+        allowedHosts: ['virtualminds.uk', '.virtualminds.uk'],
       },
       plugins: [react()],
       define: {
